@@ -103,6 +103,23 @@ async fn verify_install(app: AppHandle, id: String, game_dir: String) -> Result<
 
 // ---------- Steam ----------
 
+/// Steam і реєстр віддають шляхи малими літерами й зі скісними рисками (c:/program files/...).
+/// Беремо справжній запис з диска: canonicalize повертає регістр так, як тека названа у Windows.
+fn pretty_path(p: &Path) -> String {
+    let raw = fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf()).to_string_lossy().into_owned();
+    strip_verbatim(&raw)
+}
+
+fn strip_verbatim(s: &str) -> String {
+    if let Some(rest) = s.strip_prefix("\\\\?\\UNC\\") {
+        format!("\\\\{rest}")
+    } else if let Some(rest) = s.strip_prefix("\\\\?\\") {
+        rest.to_string()
+    } else {
+        s.to_string()
+    }
+}
+
 #[cfg(windows)]
 fn steam_root() -> Option<PathBuf> {
     use winreg::{enums::HKEY_CURRENT_USER, RegKey};
@@ -155,7 +172,7 @@ fn steam_build(appid: u32) -> Option<String> {
 fn find_steam_game_dir(appid: u32) -> Option<String> {
     let (lib, t) = steam_manifest(appid)?;
     let full = lib.join("steamapps/common").join(acf_value(&t, "installdir")?);
-    full.is_dir().then(|| full.to_string_lossy().into_owned())
+    full.is_dir().then(|| pretty_path(&full))
 }
 
 /// Поточна збірка гри в Steam (buildid). Змінюється, коли Steam оновлює гру.
@@ -192,7 +209,6 @@ fn gog_path(_id: &str) -> Option<PathBuf> {
 }
 
 fn detect_blocking(appid: Option<u32>, gog_id: Option<String>, exes: Vec<String>, folders: Vec<String>) -> Option<String> {
-    let s = |p: &Path| p.to_string_lossy().into_owned();
     if let Some(p) = appid.and_then(find_steam_game_dir) {
         if has_game(Path::new(&p), &exes) {
             return Some(p);
@@ -200,7 +216,7 @@ fn detect_blocking(appid: Option<u32>, gog_id: Option<String>, exes: Vec<String>
     }
     if let Some(p) = gog_id.as_deref().and_then(gog_path) {
         if has_game(&p, &exes) {
-            return Some(s(&p));
+            return Some(pretty_path(&p));
         }
     }
     if exes.is_empty() {
@@ -226,7 +242,7 @@ fn detect_blocking(appid: Option<u32>, gog_id: Option<String>, exes: Vec<String>
             for f in &folders {
                 let p = root.join(base).join(f);
                 if has_game(&p, &exes) {
-                    return Some(s(&p));
+                    return Some(pretty_path(&p));
                 }
             }
         }
@@ -254,10 +270,17 @@ fn paths_file(app: &AppHandle) -> Result<PathBuf, String> {
 
 #[tauri::command]
 fn get_paths(app: AppHandle) -> Result<HashMap<String, String>, String> {
-    Ok(fs::read_to_string(paths_file(&app)?)
+    let mut m: HashMap<String, String> = fs::read_to_string(paths_file(&app)?)
         .ok()
         .and_then(|t| serde_json::from_str(&t).ok())
-        .unwrap_or_default())
+        .unwrap_or_default();
+    // Раніше збережені шляхи могли бути малими літерами: виправляємо при читанні.
+    for v in m.values_mut() {
+        if Path::new(v.as_str()).exists() {
+            *v = pretty_path(Path::new(v.as_str()));
+        }
+    }
+    Ok(m)
 }
 
 #[tauri::command]
@@ -616,4 +639,16 @@ pub fn run() {
 #[tauri::command]
 fn find_steam_game_cmd(appid: u32) -> Option<String> {
     find_steam_game_dir(appid)
+}
+
+#[cfg(test)]
+mod path_tests {
+    use super::strip_verbatim;
+
+    #[test]
+    fn verbatim_prefix_is_removed() {
+        assert_eq!(strip_verbatim("\\\\?\\C:\\Games\\Blood West"), "C:\\Games\\Blood West");
+        assert_eq!(strip_verbatim("\\\\?\\UNC\\srv\\share\\g"), "\\\\srv\\share\\g");
+        assert_eq!(strip_verbatim("D:\\Steam"), "D:\\Steam");
+    }
 }

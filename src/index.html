@@ -680,20 +680,19 @@ nav .g,nav .g[aria-current=true]{padding:0;align-items:center}
 </dialog>
 <script>
 const T = window.__TAURI__, DEMO = !T?.core;
-const SUPPORT = {email:'your@email.com', issues:'https://github.com/USER/lichtar/issues'};
-/* Віддалений каталог (GitHub raw). Порожньо = беремо вбудований BUNDLED нижче. */
-const CATALOG_URL = '';
-/* Живі стрічки новин (RSS). З кожної беруться лише матеріали про українізацію. */
+const SUPPORT = {email:'hopethatislight@gmail.com', issues:'https://github.com/gustihax/lichtar/issues'};
+
+const CATALOG_URL = 'https://raw.githubusercontent.com/gustihax/lichtar-catalog/main/catalog.json';
+
 const NEWS_FEEDS = [{name:'Таємна кімната', url:'https://tayemnakimnata.com/feed/'}, {name:'УНІАН', url:'https://rss.unian.net/site/news_ukr.rss'}];
 const NEWS_RE = /українізатор|локалізац|українськ(а|у|ою|ої)\s+мов|переклад\S*\s+українськ/i;
 const MONTHS = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
-/* Адреса збору анонімної статистики (порожньо = нічого не надсилається) */
+
 const STATS_URL = '';
 const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* У програмі (Tauri) усе реальне. Лише в браузерному прев'ю працює мінімальне демо. */
 const demo = async (c,a) => { await sleep(120);
   const m = {get_paths:{}, installed_versions:{gunbrella:{version:'0.9.0',build:null}}, verify_install:{missing:[],changed:[]}, game_build:null, startup_link:null, read_log:'(демо) подій ще немає', log_event:null, cancel_install:null, post_json:null, validate_game_dir:true, pick_folder:'D:\\Games\\Custom', set_path:null, open_folder:null, rollback:null, play_game:null, storage_info:{log:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar\\lichtar.log',dir:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar',backups:48230000,cache:3100000}, clear_cache:3100000};
   if (c==='detect_game') return a.exes[0]==='BloodWest.exe' ? 'D:\\Games\\Blood West' : a.exes[0]==='Gunbrella.exe' ? 'D:\\Games\\Gunbrella' : null;
@@ -704,9 +703,6 @@ const win = T?.window?.getCurrentWindow?.();
 $('#min').onclick = () => win?.minimize();
 $('#cls').onclick = () => win?.close();
 
-/* ---- вбудований каталог. У релізі його замінює catalog.json з GitHub / адмінки ---- */
-/* Вбудований резервний каталог (для першого запуску без мережі). Генерується: python tools/sync_bundled.py */
-/*BUNDLED:start*/
 const BUNDLED = {
   "news": [
     {
@@ -827,7 +823,7 @@ const BUNDLED = {
 
 const HOME = {id:'home',home:true,name:'Ліхтар',hue:75};
 let featuredId = null, recovered = [];
-let games = [HOME], news = [], sel = 0, view = 'home', busy = null, armed = false, q = '', flt = 'all', catSource = 'вбудований';
+let games = [HOME], news = [], sel = 0, view = 'home', busy = null, armed = false, q = '', flt = 'all', catSource = 'вбудований', catErr = '';
 const PK = 'lichtar.prefs';
 const DEF = {mode:'auto',tint:'neutral',accent:75,closeOnPlay:false,autoUpdate:true,stats:false,steamBg:true,calm:false,railHover:true,autoCatalog:true,confirmRollback:true,catalogUrl:''};
 const prefs = Object.assign({}, DEF, (()=>{ try { return JSON.parse(localStorage.getItem(PK)) || {}; } catch { return {}; } })());
@@ -837,9 +833,9 @@ const hueOf = g => prefs.accent === 'game' ? (g.hue ?? 75) : prefs.accent;
 const okImg = u => /^https?:\/\//i.test(u || '') || /^data:image\/(svg\+xml|png|jpe?g|webp)/i.test(u || '');
 const safeUrl = u => /^https?:\/\//i.test(u || '') ? u : '';
 const go = (v, i) => { view = v; if (v !== 'games') { q = ''; const g0 = document.getElementById('gs'); if (g0) g0.value = ''; } if (i != null) sel = i; armed = false; render(); };
-const state = g => g.home ? 'home' : !g.path ? 'path' : !g.cur ? 'install' : g.cur !== g.version ? 'update' : g.issue ? 'repair' : 'ready';
-const label = {path:'Вказати теку гри',install:'Встановити',update:'Оновити',repair:'Відновити',ready:'Грати'};
-const KIND_ERR = /^(Помилка|Не вдалося|Файл «|Мало місця|У цій теці немає|Лише в програмі)|не знайдено|патча ще немає/i;
+const state = g => g.home ? 'home' : (g.wip && !g.cur) ? 'soon' : !g.path ? 'path' : !g.cur ? 'install' : g.cur !== g.version ? 'update' : g.issue ? 'repair' : 'ready';
+const label = {path:'Вказати теку гри',install:'Встановити',update:'Оновити',repair:'Відновити',ready:'Грати',soon:'Скоро'};
+const KIND_ERR = /^(Помилка|Не вдалося|Каталог не оновлено|Файл «|Мало місця|У цій теці немає|Лише в програмі)|не знайдено|патча ще немає/i;
 const KIND_OK = /встановлено|скопійовано|збережено|оновлено|повернуто|скинуто|Знайдено/i;
 function notify(t, kind){
   kind = kind || (KIND_ERR.test(t) ? 'err' : KIND_OK.test(t) ? 'ok' : 'info');
@@ -867,14 +863,27 @@ async function load(force = false){
     const url = prefs.catalogUrl || CATALOG_URL;
     const fromCache = () => { try { const c = JSON.parse(localStorage.getItem('lichtar.catalog')); if (Array.isArray(c?.games)) { cat = c; catSource = 'збережена копія'; return true; } } catch {} return false; };
     if (url && (prefs.autoCatalog || force)) {
-      try { const r = JSON.parse(await call('fetch_text',{url})); if (!Array.isArray(r.games)) throw new Error('некоректний каталог'); cat = r; catSource = 'GitHub'; try { localStorage.setItem('lichtar.catalog', JSON.stringify(r)); } catch {} }
-      catch(e){ console.warn('каталог', e); if (fromCache()) catSource = 'збережена копія, немає мережі'; }
+      catErr = '';
+      const pull = async () => {
+        let raw;
+        try { raw = await call('fetch_text',{url}); }
+        catch(e1){
+          try { const r = await fetch(url, {cache:'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); raw = await r.text(); }
+          catch(e2){ throw new Error('не вдалося завантажити (' + String(e1).slice(0,120) + ')'); }
+        }
+        let r; try { r = JSON.parse(raw.replace(/^\uFEFF/, '')); } catch(e){ throw new Error('файл каталогу пошкоджений: ' + e.message); }
+        if (!Array.isArray(r.games)) throw new Error('у файлі немає списку games');
+        return r;
+      };
+      try { const r = await pull(); cat = r; catSource = 'GitHub'; try { localStorage.setItem('lichtar.catalog', JSON.stringify(r)); } catch {} }
+      catch(e){ console.warn('каталог', e); catErr = String(e.message || e); if (fromCache()) catSource = 'збережена копія'; }
     } else if (url) fromCache();
     mark(1,'Читаю збережені шляхи');
     const rec = await call('recover_pending').catch(() => []);
     recovered = rec || [];
     const [paths, vers] = await Promise.all([call('get_paths'), call('installed_versions')]);
     mark(2,'Шукаю ігри на комп’ютері');
+    cat.games.forEach(g => { if (g.progress == null && g.translationProgress != null) g.progress = Number(g.translationProgress); g.wip = !g.url; });
     games = [HOME, ...cat.games]; news = cat.news || []; featuredId = cat.featured || null;
     await Promise.all(games.slice(1).map(async g => {
       g.cur = vers[g.id]?.version || null; g.curBuild = vers[g.id]?.build || null;
@@ -977,15 +986,15 @@ function renderList(){
   document.querySelectorAll('.g').forEach(b=>b.onclick=()=>b.dataset.v==='support' ? openSupport() : go(b.dataset.v));
 }
 
-const ACT = {update:'Оновити', install:'Встановити', ready:'Грати', repair:'Відновити', path:'Вказати теку'};
+const ACT = {update:'Оновити', install:'Встановити', ready:'Грати', repair:'Відновити', path:'Вказати теку', soon:'Скоро'};
 const steamImg = (g, kind) => g.steam_appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/${kind}.jpg` : '';
 function quick(i){ const keep = sel; sel = i; act(); sel = keep; }
 const CHEV = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
 function renderHome(){
   const gs = games.filter(x => !x.home);
-  const rank = x => ({update:0, repair:1, ready:2, install:3, path:4}[state(x)] ?? 5);
+  const rank = x => ({update:0, repair:1, ready:2, install:3, path:4, soon:5}[state(x)] ?? 6);
   const pick = gs.find(x => state(x) === 'update') || gs.find(x => x.id === featuredId) || [...gs].sort((a,b) => rank(a) - rank(b))[0];
-  const subline = (x, st) => st === 'update' ? `Оновлення ${esc(x.cur)} → ${esc(x.version)}, ${esc(x.size)}` : st === 'repair' ? 'Потрібне відновлення українізатора' : st === 'ready' ? `Українізатор ${esc(x.cur)}${x.progress != null ? ', ' + x.progress + '% перекладено' : ''}` : st === 'path' ? 'Гру не знайдено на цьому ПК' : `Український переклад${x.progress != null ? ', ' + x.progress + '%' : ''}`;
+  const subline = (x, st) => st === 'update' ? `Оновлення ${esc(x.cur)} → ${esc(x.version)}, ${esc(x.size)}` : st === 'repair' ? 'Потрібне відновлення українізатора' : st === 'ready' ? `Українізатор ${esc(x.cur)}${x.progress != null ? ', ' + x.progress + '% перекладено' : ''}` : st === 'soon' ? `Переклад у роботі${x.progress != null ? ', ' + x.progress + '%' : ''}` : st === 'path' ? 'Гру не знайдено на цьому ПК' : `Український переклад${x.progress != null ? ', ' + x.progress + '%' : ''}`;
   let hero = '';
   if (pick) { const i = games.indexOf(pick), st = state(pick), art = steamImg(pick, 'library_hero'), cv = cover(pick);
     hero = `<div class="sl one" data-i="${i}" tabindex="0" style="--th:${esc(pick.hue)}"><span class="fb">${esc(pick.name[0])}</span>${art ? `<img class="bgimg" src="${esc(art)}" alt="">` : ''}<div class="sc">${cv ? `<img class="sth" src="${esc(cv)}" alt="">` : ''}<h3>${esc(pick.name)}</h3><p>${subline(pick, st)}</p><button class="go pl" data-q="${i}"><span>${ACT[st]}</span></button></div></div>`; }
@@ -1018,8 +1027,8 @@ function renderGames(){
 }
 function tileHtml(g, i, n){
   const c = cover(g), st = state(g);
-  const sub = st === 'update' ? 'Є оновлення' : st === 'repair' ? 'Потрібне відновлення' : st === 'path' ? 'Не знайдено на ПК' : st === 'ready' ? 'Встановлено ' + esc(g.cur) : (g.progress != null ? g.progress + '% перекладено' : 'Не встановлено');
-  return `<button class="tile ${g.cur ? 'on' : 'off'}" data-i="${i}" aria-label="${esc(g.name)}" style="--th:${esc(g.hue)};--i:${n}"><span class="fb">${esc(g.name[0])}</span>${c ? `<span class="pic"><img src="${esc(c)}" alt="" loading="lazy"></span>` : ''}${st === 'update' ? '<i class="bdg">Оновлення</i>' : ''}<span class="nm">${esc(g.name)}<small>${sub}</small></span></button>`;
+  const sub = st === 'update' ? 'Є оновлення' : st === 'repair' ? 'Потрібне відновлення' : st === 'soon' ? 'У роботі' + (g.progress != null ? ', ' + g.progress + '%' : '') : st === 'path' ? 'Не знайдено на ПК' : st === 'ready' ? 'Встановлено ' + esc(g.cur) : (g.progress != null ? g.progress + '% перекладено' : 'Не встановлено');
+  return `<button class="tile ${g.cur ? 'on' : 'off'}" data-i="${i}" aria-label="${esc(g.name)}" style="--th:${esc(g.hue)};--i:${n}"><span class="fb">${esc(g.name[0])}</span>${c ? `<span class="pic"><img src="${esc(c)}" alt="" loading="lazy"></span>` : ''}${st === 'update' ? '<i class="bdg">Оновлення</i>' : g.badge ? `<i class="bdg">${esc(g.badge)}</i>` : ''}<span class="nm">${esc(g.name)}<small>${sub}</small></span></button>`;
 }
 function fillGrid(){
   const qq = q.trim().toLowerCase();
@@ -1050,7 +1059,7 @@ function panel(){
   if (tab==='paths') return `<p class="note" style="padding:14px 0;font-size:13px">Тут видно, де лежить кожна гра. Якщо Ліхтар не знайшов, вкажіть теку самі.</p>`
     + games.slice(1).map(g=>row(esc(g.name), `<span class="pth">${g.path?esc(g.path):'Не знайдено'}</span>`,
         `<button class="tl" data-a="${g.path?'op':'rt'}" data-id="${esc(g.id)}">${g.path?'Відкрити':'Знайти'}</button><button class="tl" data-a="ch" data-id="${esc(g.id)}">Змінити</button>`)).join('');
-  if (tab==='catalog') return row('Джерело', esc(catSource), `<span>${games.length-1} ігор</span>`)
+  if (tab==='catalog') return row('Джерело', esc(catSource) + (catErr ? '<br><span class="note warn">Причина: ' + esc(catErr) + '</span>' : ''), `<span>${games.length-1} ігор</span>`)
     + `<div class="sr col"><div class="rt"><b>Адреса каталогу</b><span>Якщо порожньо, береться стандартний</span></div><input class="txt" id="curl" spellcheck="false" placeholder="https://raw.githubusercontent.com/…/catalog.json" value="${esc(prefs.catalogUrl)}"></div>`
     + row('Оновити каталог зараз','', '<button class="tl" id="rl">Оновити</button>');
   if (tab==='data') return row('Тека даних','<span class="pth" id="d-dir">…</span>','<button class="tl" id="d-open">Відкрити</button>')
@@ -1058,7 +1067,7 @@ function panel(){
     + row('Кеш завантажень','Те, що не докачалось', '<span id="d-ch">…</span><button class="tl" id="d-clr">Очистити</button>')
     + row('Журнал','', '<button class="tl" id="l-copy">Скопіювати</button><button class="tl" id="l-open">Відкрити</button>')
     + row('Надсилати статистику встановлень', STATS_URL ? 'Лише назва гри, версія та чи вдалося. Нічого особистого' : 'Поки вимкнено: немає адреси для збору', sw('stats'));
-  return row('Версія','0.1.0, © 2026 Ліхтар', '<button class="tl" id="a-upd">Перевірити оновлення</button>') + row('Перевіряти оновлення Ліхтаря при запуску','', sw('autoUpdate'))
+  return row('Версія','0.1.1, © 2026 Ліхтар', '<button class="tl" id="a-upd">Перевірити оновлення</button>') + row('Перевіряти оновлення Ліхтаря при запуску','', sw('autoUpdate'))
     + row('Діагностика','', '<button class="tl" id="a-copy">Скопіювати</button><button class="tl" id="a-sup">Підтримка</button>')
     + row('Скинути налаштування','', '<button class="tl" id="a-rs">Скинути</button>');
 }
@@ -1076,7 +1085,7 @@ function renderSettings(){
   on('[data-a]', b=>{ const g = gm(b.dataset.id), a = b.dataset.a;
     if (a==='op') call('open_folder',{path:g.path}).catch(e=>setStatus(String(e))); else if (a==='rt') redetect(g); else pickDir(g); });
   const cu = $('#curl'); if (cu) cu.onchange = () => { prefs.catalogUrl = cu.value.trim(); savePrefs(); setStatus('Адресу збережено. Натисніть «Оновити»'); };
-  on('#rl', async ()=>{ if (busy) return; setStatus('Оновлюю каталог…'); await load(true); render(); setStatus(`Каталог оновлено. Джерело: ${catSource}`); });
+  on('#rl', async ()=>{ if (busy) return; setStatus('Оновлюю каталог…'); await load(true); render(); setStatus(catErr ? `Каталог не оновлено: ${catErr}` : `Каталог оновлено. Джерело: ${catSource}`); });
   if (tab==='data') {
     const refresh = () => call('storage_info').then(i=>{ $('#d-dir').textContent = i.dir; logPath = i.log; $('#d-bk').textContent = fmt(i.backups); $('#d-ch').textContent = fmt(i.cache); $('#d-clr').disabled = !i.cache;
       $('#d-open').onclick = () => call('open_folder',{path:i.dir}).catch(e=>setStatus(String(e))); }).catch(e=>setStatus(String(e)));
@@ -1137,6 +1146,7 @@ function renderGame(g){
   const ver = mine ? `<span class="note">${esc(job.txt)}</span>`
     : s==='update' ? `<span class="ver"><s>${esc(g.cur)}</s><em>${esc(g.version)}</em></span>${warn}`
     : s==='ready' || s==='repair' ? `<span class="ver"><em>${esc(g.cur)}</em></span><span class="note">${s==='repair'?'Потрібне відновлення':'Актуальна версія'}</span>${warn}`
+    : s==='soon' ? `<span class="note">Переклад ще в роботі${g.progress != null ? ', ' + g.progress + '%' : ''}</span>`
     : s==='install' ? `<span class="ver"><em>${esc(g.version)}</em></span>${warn}`
     : `<span class="warnline">Гру не знайдено. Вкажіть теку вручну.</span>`;
   const msg = g.err ? g.err : g.issue && !mine ? (g.issue.kind === 'build'
@@ -1155,7 +1165,7 @@ function renderGame(g){
     <div class="studio">${esc(g.studio)}</div>
     <h1 class="title ${mine?'':'idle'}" id="t" style="--p:${mine?job.pct:100}">${esc(g.name)}</h1>
     <div class="meta" id="meta">${ver}</div>
-    <div class="act"><button class="go" id="go" ${mine||queued?'disabled':''} style="--f:${mine?job.pct/100:0}"><i class="fill"></i><span>${mine?Math.round(job.pct)+'%':queued?'У черзі':label[s]}</span></button></div>
+    <div class="act"><button class="go" id="go" ${mine||queued||s==='soon'?'disabled':''} style="--f:${mine?job.pct/100:0}"><i class="fill"></i><span>${mine?Math.round(job.pct)+'%':queued?'У черзі':label[s]}</span></button></div>
     ${dlc}${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
     <div class="sub">${sub.join('')}</div>
     ${gbody(g)}</div>${aside(g)}</div>`;
@@ -1200,7 +1210,7 @@ async function pickDir(g){
 }
 
 const log = m => call('log_event',{msg:m}).catch(()=>{});
-const stat = (g, ok) => { if (prefs.stats && STATS_URL) call('post_json',{url:STATS_URL,body:JSON.stringify({game:g.id,version:g.version,ok,launcher:'0.1.0'})}).catch(()=>{}); };
+const stat = (g, ok) => { if (prefs.stats && STATS_URL) call('post_json',{url:STATS_URL,body:JSON.stringify({game:g.id,version:g.version,ok,launcher:'0.1.1'})}).catch(()=>{}); };
 function errText(m){
   m = String(m);
   if (m === 'CANCELLED') return 'Скасовано. Завантажене збережено, можна продовжити.';
@@ -1226,6 +1236,7 @@ async function install(g){
 async function act(){
   const g = games[sel], s = state(g);
   if (job?.id === g.id || queue.includes(g.id)) return;
+  if (s==='soon') return setStatus('Переклад ще в роботі. Слідкуйте за новинами');
   if (s==='path') return pickDir(g);
   if (s==='ready') return call('play_game',{appid:g.steam_appid ?? null,gameDir:g.path,exe:(g.exe||[])[0] ?? null}).then(()=>{ setStatus(`Запускаю ${g.name}`); if (prefs.closeOnPlay) setTimeout(()=>win?.close(), 1500); }).catch(e=>setStatus('Не вдалося запустити: '+e));
   install(g);
@@ -1264,7 +1275,7 @@ function mkDD(el, items, value, onChange){
 /* ---- звернення в підтримку ---- */
 const TYPES = ['Помилка в перекладі', 'Не встановлюється', 'Не запускається', 'Інше'];
 let mdType = TYPES[0], mdGid = '';
-const diagFor = g => `Ліхтар 0.1.0\nГра: ${g ? g.name : '—'}${g ? `\nВстановлено: ${g.cur || 'ні'}, у каталозі: ${g.version || '—'}\nШлях: ${g.path || 'не вказано'}` : ''}\nСистема: ${navigator.userAgent}`;
+const diagFor = g => `Ліхтар 0.1.1\nГра: ${g ? g.name : '—'}${g ? `\nВстановлено: ${g.cur || 'ні'}, у каталозі: ${g.version || '—'}\nШлях: ${g.path || 'не вказано'}` : ''}\nСистема: ${navigator.userAgent}`;
 const diag = () => diagFor(view === 'game' ? games[sel] : null);
 const mdGame = () => games.find(x => x.id === mdGid);
 function mdMsg(t, ok){ const m = $('#md-e'); m.textContent = t; m.className = 'md-e' + (ok ? ' ok' : ''); }
