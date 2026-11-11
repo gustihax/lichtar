@@ -1,0 +1,9 @@
+{
+  "bundle": { "createUpdaterArtifacts": true },
+  "plugins": {
+    "updater": {
+      "pubkey": "ВСТАВТЕ_ПУБЛІЧНИЙ_КЛЮЧ_ЗІ_ШТ",
+      "endpoints": ["https://github.com/ВАШ_НІК/lichtar/releases/latest/download/latest.json"]
+    }
+  }
+}

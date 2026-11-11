@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ліхтар</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23221a14'/%3E%3Cg fill='none' stroke='%23f2b84b' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 19c0-10 16-10 16 0'/%3E%3Cpath d='M20 26l4-7h16l4 7z'/%3E%3Cpath d='M22 26v22M42 26v22'/%3E%3Cpath d='M19 48h26l-2 6H21z'/%3E%3C/g%3E%3Cpath d='M32 29c3 3.2 4.5 5.6 4.5 8a4.5 4.5 0 0 1-9 0c0-2.4 1.5-4.8 4.5-8z' fill='%23f2b84b'/%3E%3C/svg%3E">
+<style>
+@property --h{syntax:'<number>';inherits:true;initial-value:25}
+:root{
+  --h:25;
+  --bg:oklch(.95 calc(.035*var(--k)) var(--h));--bg2:oklch(.91 calc(.05*var(--k)) var(--h));
+  --tx:oklch(.2 calc(.03*var(--k)) var(--h));--dim:oklch(.2 calc(.03*var(--k)) var(--h)/.64);--line:oklch(.2 calc(.03*var(--k)) var(--h)/.16);
+  --ac:oklch(.5 .19 var(--h));--onac:oklch(.97 .02 var(--h));
+  --disp:"Bahnschrift","Arial Narrow","Segoe UI",system-ui,sans-serif;
+  --body:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  transition:--h .7s cubic-bezier(.2,.7,.2,1);color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:oklch(.2 calc(.045*var(--k)) var(--h));--bg2:oklch(.25 calc(.06*var(--k)) var(--h));
+  --tx:oklch(.94 calc(.015*var(--k)) var(--h));--dim:oklch(.94 calc(.015*var(--k)) var(--h)/.66);--line:oklch(.94 calc(.015*var(--k)) var(--h)/.16);
+  --ac:oklch(.76 .17 var(--h));--onac:oklch(.18 .04 var(--h));color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:oklch(.2 calc(.045*var(--k)) var(--h));--bg2:oklch(.25 calc(.06*var(--k)) var(--h));
+  --tx:oklch(.94 calc(.015*var(--k)) var(--h));--dim:oklch(.94 calc(.015*var(--k)) var(--h)/.66);--line:oklch(.94 calc(.015*var(--k)) var(--h)/.16);
+  --ac:oklch(.76 .17 var(--h));--onac:oklch(.18 .04 var(--h));color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 var(--body);overflow:hidden;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.app{height:100%;display:grid;grid-template-rows:34px 1fr 30px}
+.bar{display:flex;align-items:center;justify-content:space-between;padding-left:16px;color:var(--dim);font-size:12px}
+.bar b{font-family:var(--disp);font-weight:600;letter-spacing:.02em;color:var(--tx);font-size:13px}
+.wc{display:flex}.wc button{width:46px;height:34px;color:var(--dim)}
+.wc button:hover{background:var(--line);color:var(--tx)}.wc .x:hover{background:#c42b1c;color:#fff}
+.main{display:grid;grid-template-columns:230px 1fr;min-height:0}
+/* index */
+nav{padding:18px 0 14px;display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0}
+nav h2{font:600 12px var(--body);color:var(--dim);padding:0 22px 10px}
+.list{flex:1;overflow:auto}
+.g{display:flex;align-items:baseline;justify-content:space-between;width:100%;text-align:left;padding:9px 22px;
+  font-family:var(--disp);font-size:19px;font-weight:500;color:var(--dim);border-left:3px solid transparent;transition:.15s}
+.g:hover{color:var(--tx)}
+.g[aria-current=true]{color:var(--tx);border-left-color:var(--ac);padding-left:28px;background:linear-gradient(90deg,var(--bg2),transparent)}
+.g i{font:normal 12px var(--body);color:var(--ac)}
+.add{margin:6px 22px 0;padding:9px 0;border-top:1px solid var(--line);text-align:left;color:var(--dim)}
+.add:hover{color:var(--tx)}
+/* stage */
+.stage{position:relative;display:flex;flex-direction:column;padding:34px 52px 24px;min-width:0;overflow:auto}
+.studio{color:var(--dim);font-size:13px;margin-bottom:2px}
+.title{font-family:var(--disp);font-weight:700;font-size:clamp(54px,9.5vw,132px);line-height:.92;letter-spacing:-.01em;
+  font-variation-settings:"wdth" 80;--p:100;
+  background:linear-gradient(90deg,var(--ac) calc(var(--p)*1%),color-mix(in oklab,var(--tx) 20%,transparent) calc(var(--p)*1%));
+  -webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.06em;
+  width:fit-content;max-width:100%;overflow-wrap:anywhere}
+.title.idle{background:none;color:var(--tx);-webkit-background-clip:border-box}
+.meta{margin:14px 0 22px;display:flex;align-items:center;gap:14px;min-height:24px;font-size:15px}
+.ver{font-family:var(--disp);font-size:17px}
+.ver s{color:var(--dim);margin-right:8px}
+.ver em{font-style:normal;color:var(--ac);font-weight:600}
+.note{color:var(--dim)}
+.act{display:flex;align-items:stretch;gap:0;width:min(520px,100%)}
+.go{flex:1;background:var(--ac);color:var(--onac);font-family:var(--disp);font-size:26px;font-weight:600;padding:16px 26px;
+  text-align:left;border-radius:3px;position:relative;overflow:hidden;transition:transform .12s,filter .15s}
+.go:hover{filter:brightness(1.08)}.go:active{transform:translateY(1px)}
+.go[disabled]{cursor:progress;filter:saturate(.5)}
+.go .fill{position:absolute;inset:0;background:oklch(1 0 0/.22);transform-origin:left;transform:scaleX(var(--f,0))}
+.go span{position:relative}
+.sub{display:flex;gap:22px;margin-top:14px;color:var(--dim)}
+.sub button{padding:2px 0;border-bottom:1px solid transparent}
+.sub button:hover{color:var(--tx);border-color:var(--line)}
+.sub .warn{color:var(--ac);border-color:var(--ac)}
+/* journal */
+.log{margin-top:38px;max-width:640px}
+.log h3{font:600 13px var(--body);color:var(--dim);margin-bottom:6px}
+.e{display:grid;grid-template-columns:88px 1fr;gap:0 18px;padding:14px 0;border-top:1px solid var(--line)}
+.e .v{font-family:var(--disp);font-size:22px;font-weight:600;line-height:1.1}
+.e .d{color:var(--dim);font-size:12px}
+.e ul{list-style:none;padding:0;display:grid;gap:5px}
+.e li{padding-left:16px;position:relative}
+.e li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:2px;background:var(--dim)}
+.e li.fix::before{background:var(--ac);height:7px;top:.45em;width:7px;border-radius:50%}
+.e li.new::before{background:var(--ac)}
+.e.cur .v{color:var(--ac)}
+.foot{display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+.foot .live{color:var(--tx)}
+.app{position:relative}
+.app>:not(.bg){position:relative;z-index:1}
+.bar b{display:flex;align-items:center;gap:9px}
+.mk{width:20px;height:20px;color:var(--ac);fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.mk circle{fill:currentColor;stroke:none}
+.bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.bg>div{position:absolute}
+.bg .glow{inset:-10%;background:radial-gradient(48% 62% at 82% 8%,oklch(.7 .2 var(--h)/.30),transparent 70%),radial-gradient(40% 50% at 100% 100%,oklch(.5 .15 calc(var(--h) + 40)/.22),transparent 70%)}
+.bg .gl{right:-2vw;bottom:-14vh;font:700 78vh/1 var(--disp);font-variation-settings:"wdth" 70;color:var(--ac);opacity:.07;white-space:nowrap}
+.bg .art{inset:0;background-size:cover;background-position:center;filter:grayscale(1) contrast(1.05);opacity:.55}
+.bg .tint{inset:0;background:var(--ac);mix-blend-mode:color;opacity:.6}
+.bg .fade{inset:0;background:linear-gradient(90deg,var(--bg) 20%,transparent 95%)}
+.bg .grain{inset:0;opacity:.08;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.supbtn{color:var(--dim);margin-right:16px}.supbtn:hover{color:var(--tx)}
+dialog{margin:auto;border:1px solid var(--line);background:var(--bg2);color:var(--tx);padding:26px 28px;width:min(420px,92vw);border-radius:4px;font:14px/1.5 var(--body)}
+dialog::backdrop{background:oklch(0 0 0/.55)}
+dialog h3{font:600 24px var(--disp);margin-bottom:4px}
+dialog p{color:var(--dim);margin-bottom:16px}
+.dl a,.dl button{display:block;width:100%;text-align:left;padding:12px 0;border-top:1px solid var(--line);color:var(--tx);text-decoration:none}
+.dl a:hover,.dl button:hover{color:var(--ac)}
+.dl small{display:block;color:var(--dim)}
+.row{display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:13px 0;border-top:1px solid var(--line);font:500 20px var(--disp);text-align:left}
+.row span{font:14px var(--body);color:var(--dim)}.row:hover{color:var(--ac)}
+a.add{display:block;text-decoration:none}
+.nw{padding:18px 0;border-top:1px solid var(--line)}
+.nw .d{font-size:12px;color:var(--dim)}.nw b{color:var(--ac);margin-left:10px;font-weight:600}
+.nw h4{font:600 22px/1.15 var(--disp);margin-top:4px}.nw.top h4{font-size:36px}
+.nw p{color:var(--dim);margin-top:6px;max-width:56ch}
+#splash{position:fixed;inset:34px 0 0 0;z-index:50;background:var(--bg);display:grid;place-items:center;transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+.sp-in{width:min(420px,80vw)}
+.mk.big{width:56px;height:56px;stroke-width:4.5}
+.mk.big circle{animation:pulse 1.8s ease-in-out infinite;transform-origin:36px 36px}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.55}}
+.sp-n{font:700 clamp(96px,22vw,168px)/1 var(--disp);font-variation-settings:"wdth" 80;margin:18px 0 8px;letter-spacing:-.02em}
+.sp-n small{font-size:.28em;color:var(--ac);margin-left:6px}
+.sp-bar{height:3px;background:var(--line);overflow:hidden}
+.sp-bar i{display:block;height:100%;background:var(--ac);transform-origin:left;transform:scaleX(0)}
+.sp-l{margin-top:12px;color:var(--dim);font-size:13px;min-height:20px}
+@media (prefers-reduced-motion:reduce){.mk.big circle{animation:none}}
+input{user-select:text}
+.title.sm{font-size:clamp(40px,6vw,72px)}
+.back{color:var(--dim);margin-bottom:14px;align-self:flex-start}.back:hover{color:var(--tx)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--dim);transition:.15s}
+.chip:hover{color:var(--tx)}.chip[aria-pressed=true]{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+.tools{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin:18px 0 22px}
+#q{background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--tx);font:inherit;padding:6px 2px;width:220px}
+#q:focus{outline:0;border-color:var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;padding-bottom:12px}
+.tile{position:relative;aspect-ratio:2/3;overflow:hidden;border-radius:3px;background:oklch(.3 .09 var(--th));transition:transform .18s,outline-color .18s;outline:2px solid transparent;outline-offset:2px}
+.tile:hover,.tile:focus-visible{transform:translateY(-4px);outline-color:var(--ac)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile .fb{position:absolute;inset:0;display:grid;place-items:center;font:700 84px var(--disp);color:oklch(.82 .12 var(--th)/.5)}
+.tile .nm{position:absolute;left:0;right:0;bottom:0;padding:38px 12px 12px;text-align:left;color:#fff;font:600 17px/1.15 var(--disp);background:linear-gradient(transparent,oklch(.1 .02 var(--th)/.92));opacity:0;transform:translateY(6px);transition:.18s}
+.tile .nm small{display:block;font:12px var(--body);opacity:.78;margin-top:2px}
+.tile:hover .nm,.tile:focus-visible .nm{opacity:1;transform:none}
+.tile .bdg{position:absolute;top:8px;right:8px;width:12px;height:12px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 3px oklch(0 0 0/.5)}
+.set section{padding:18px 0;border-top:1px solid var(--line);max-width:560px}
+.set h3{font:600 13px var(--body);color:var(--dim);margin-bottom:10px}
+.chk{display:flex;gap:10px;align-items:center;cursor:pointer}.chk input{accent-color:var(--ac);width:16px;height:16px}
+.lnk{margin-top:8px;color:var(--dim);border-bottom:1px solid var(--line)}.lnk:hover{color:var(--tx)}
+input[type=range]{-webkit-appearance:none;appearance:none;display:block;width:min(360px,100%);height:10px;margin-top:16px;border-radius:5px;background:linear-gradient(90deg,oklch(.7 .15 0),oklch(.7 .15 60),oklch(.7 .15 120),oklch(.7 .15 180),oklch(.7 .15 240),oklch(.7 .15 300),oklch(.7 .15 360))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--tx);border:4px solid var(--bg);cursor:pointer}
+.nimg{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;margin:12px 0 6px}
+.nw.has:not(.top){display:grid;grid-template-columns:1fr 170px;gap:0 20px}
+.nw.has:not(.top)>*{grid-column:1}
+.nw.has:not(.top)>.nimg{grid-column:2;grid-row:1/span 4;margin:0;aspect-ratio:4/3}
+.go2{color:var(--ac);margin-top:8px;text-align:left}
+.main{grid-template-columns:64px 1fr;position:relative}
+.stage{grid-column:2}
+nav{position:absolute;left:0;top:0;bottom:0;width:64px;z-index:5;padding:14px 0;background:var(--bg);overflow:hidden;border-right:1px solid var(--line);transition:width .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s}
+html[data-rail=hover] nav:hover,nav:has(:focus-visible){width:224px;box-shadow:10px 0 36px oklch(0 0 0/.22)}
+nav .list{display:flex;flex-direction:column;height:100%;overflow:hidden}
+nav .g{position:relative;display:flex;align-items:center;gap:20px;width:100%;height:52px;padding:0 20px;border-left:0;background:none;color:var(--dim);font:500 15px var(--body);white-space:nowrap;box-shadow:inset 3px 0 0 transparent;transition:color .15s,background .15s}
+nav .g:hover{color:var(--tx)}
+nav .g[aria-current=true]{padding-left:20px;color:var(--ac);background:linear-gradient(90deg,var(--bg2),transparent);box-shadow:inset 3px 0 0 var(--ac)}
+nav .g.bot{margin-top:auto}
+.g .ic{position:relative;flex:none;width:24px;height:24px}
+.g svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.g .ic b{position:absolute;top:-6px;right:-8px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--ac);color:var(--onac);font:700 10px/16px var(--body);text-align:center}
+.g .lb{opacity:0;transition:opacity .12s}
+html[data-rail=hover] nav:hover .lb,nav:has(:focus-visible) .lb{opacity:1}
+html[data-calm] *{transition:none!important;animation:none!important}
+.st-h{font:700 40px/1 var(--disp);font-variation-settings:"wdth" 80;margin:6px 0 26px}
+.st{display:grid;grid-template-columns:190px minmax(0,720px);gap:0 44px;align-items:start}
+.st-nav{position:sticky;top:0;display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line)}
+.st-nav button{position:relative;text-align:left;padding:9px 14px 9px 0;color:var(--dim);font-size:14px}
+.st-nav button:hover{color:var(--tx)}
+.st-nav button[aria-current=true]{color:var(--tx);font-weight:600}
+.st-nav button[aria-current=true]::after{content:"";position:absolute;right:-1px;top:6px;bottom:6px;width:2px;background:var(--ac)}
+.st-body h2{font:600 20px var(--disp);padding-bottom:12px;border-bottom:1px solid var(--line)}
+.sr{display:flex;justify-content:space-between;align-items:center;gap:28px;padding:15px 0;border-bottom:1px solid var(--line)}
+.sr.col{display:block}
+.rt{min-width:0}.rt b{display:block;font-weight:600}.rt span{display:block;color:var(--dim);font-size:13px;margin-top:2px}
+.rt .pth{font:12px "Cascadia Mono",Consolas,monospace;overflow-wrap:anywhere}
+.rc{display:flex;align-items:center;gap:14px;flex:none;font-size:13px;color:var(--dim)}
+.seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{padding:6px 14px;color:var(--dim);font-size:13px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--ac);color:var(--onac);font-weight:600}
+.sw{position:relative;flex:none;width:40px;height:22px;border-radius:11px;background:var(--line);transition:.15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--tx);transition:.15s}
+.sw[aria-checked=true]{background:var(--ac)}.sw[aria-checked=true]::after{left:21px;background:var(--onac)}
+.tl{color:var(--ac);font-size:13px;border-bottom:1px solid transparent}.tl:hover{border-color:var(--ac)}.tl[disabled]{color:var(--dim);cursor:default;border-color:transparent}
+.txt{width:100%;background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--tx);font:12px "Cascadia Mono",Consolas,monospace;padding:8px 10px;margin-top:10px}
+.txt:focus{outline:0;border-color:var(--ac)}
+.dots{display:flex;gap:12px;margin-top:14px}
+.dot{width:26px;height:26px;border-radius:50%;background:oklch(.7 .17 var(--dh));outline:2px solid transparent;outline-offset:3px}
+.dot[aria-pressed=true]{outline-color:var(--tx)}
+.alert{margin:16px 0 0;max-width:520px;padding:12px 14px;border-left:3px solid var(--ac);background:var(--bg2);font-size:13px;user-select:text}
+.note.warn{color:var(--ac)}
+.tabs{display:flex;gap:24px;margin:34px 0 0;border-bottom:1px solid var(--line);max-width:700px}
+.tabs button{padding:8px 0;margin-bottom:-1px;color:var(--dim);font-size:14px;border-bottom:2px solid transparent}
+.tabs button:hover{color:var(--tx)}.tabs button[aria-current=true]{color:var(--tx);font-weight:600;border-color:var(--ac)}
+.gbody{max-width:700px}
+.prog{width:160px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ac)}
+.issues{margin:8px 0 0;padding-left:18px;color:var(--dim);font-size:13px}
+#dock{display:flex;align-items:center;gap:14px;font-size:12px}
+.dk{display:flex;align-items:center;gap:10px;color:var(--tx)}
+.dkb{display:inline-block;width:90px;height:4px;background:var(--line);overflow:hidden}.dkb i{display:block;height:100%;background:var(--ac)}
+.ba{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:3px;margin:16px 0 6px;--x:50%}
+.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ba .b{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.ba input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;background:none}
+.ba::after{content:"";position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--ac);pointer-events:none}
+.ba .tg{position:absolute;top:10px;padding:2px 8px;background:oklch(0 0 0/.55);color:#fff;font-size:11px;border-radius:2px}
+/* ===== «ліхтар»: рух і світло ===== */
+:root{--mx:-999px;--my:-999px}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.985)}}
+@keyframes flick{0%,100%{opacity:1;transform:scale(1)}30%{opacity:.8;transform:scale(1.25)}55%{opacity:.95;transform:scale(.95)}75%{opacity:.75;transform:scale(1.4)}}
+@keyframes ignite{to{opacity:1}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ping{to{transform:scale(2.6);opacity:0}}
+@keyframes burst{to{transform:scale(24);opacity:0}}
+@keyframes drift{to{transform:translate(-3%,4%) scale(1.08)}}
+@keyframes sheen{from{background-position:120% 0}to{background-position:-20% 0}}
+.stage.enter>*:not(.gp):not(.hm),.stage.enter .gm>*,.stage.enter .gd>*,.stage.enter .hl>*,.stage.enter .hs>*{animation:rise .6s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--k,0)*60ms)}
+.bg .glow{animation:drift 24s ease-in-out infinite alternate}
+.bg .lamp{inset:0;background:radial-gradient(420px circle at var(--mx) var(--my),oklch(.8 .16 var(--h)/.15),transparent 70%)}
+.bg .art{transform:translate(calc(var(--px,0)*-14px),calc(var(--py,0)*-10px)) scale(1.06);transition:transform .5s ease-out}
+.bar .mk circle{transform-origin:36px 36px;animation:flick 3.2s infinite}
+/* рейка: рухомий індикатор */
+.ri{position:absolute;left:0;top:0;width:3px;height:52px;background:var(--ac);border-radius:0 2px 2px 0;box-shadow:0 0 18px 2px var(--ac);transition:transform .4s cubic-bezier(.3,1.25,.5,1),height .3s;z-index:1}
+nav .g[aria-current=true]{box-shadow:none}
+.g .lb{transform:translateX(-8px);transition:opacity .15s,transform .22s}
+html[data-rail=hover] nav:hover .lb,nav:has(:focus-visible) .lb{transform:none}
+/* заставка: світло росте разом із відсотками */
+#splash::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,oklch(.8 .17 var(--h)/.30) 0,transparent calc(8% + var(--pr,0)*.62%))}
+.sp-in{position:relative}.sp-n{font-variant-numeric:tabular-nums}
+.mk.big path{stroke-dasharray:90;stroke-dashoffset:90;animation:draw 1.1s .2s cubic-bezier(.5,0,.2,1) forwards}
+.mk.big circle{opacity:0;animation:ignite .6s 1s forwards,flick 2.4s 1.7s infinite}
+/* головна */
+.title.idle.home{background:linear-gradient(100deg,var(--tx) 30%,var(--ac) 50%,var(--tx) 70%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 7s ease-in-out infinite}
+.stats{display:flex;gap:40px;margin:22px 0 26px}.stats div{display:flex;flex-direction:column}
+.stats b{font:700 58px/1 var(--disp);font-variation-settings:"wdth" 80;font-variant-numeric:tabular-nums}
+.stats span{color:var(--dim);font-size:13px;margin-top:4px}.stats .hot b{color:var(--ac)}
+.fh{font:600 13px var(--body);color:var(--dim);margin:38px 0 18px}
+.feed{position:relative;padding-left:28px;max-width:760px}
+.feed::before{content:"";position:absolute;left:5px;top:8px;bottom:0;width:1px;background:linear-gradient(var(--ac),var(--line) 35%)}
+.feed .nw{position:relative;border:0;padding:0 0 32px}
+.feed .nw::before{content:"";position:absolute;left:-28px;top:6px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:2px solid var(--ac)}
+.feed .nw.top::before{background:var(--ac);box-shadow:0 0 0 5px color-mix(in oklab,var(--ac) 25%,transparent)}
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s,transform .6s cubic-bezier(.2,.7,.2,1)}.rv.vis{opacity:1;transform:none}
+/* кнопка дії */
+.act{position:relative}
+.go span{z-index:1}
+.go::after{content:"";position:absolute;inset:0;background:radial-gradient(170px circle at var(--bx,30%) var(--by,50%),oklch(1 0 0/.38),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none}
+.go:hover::after{opacity:1}
+.go:not([disabled]) span::after{content:"→";display:inline-block;margin-left:14px;transition:transform .25s}
+.go:not([disabled]):hover span::after{transform:translateX(7px)}
+.burst{position:absolute;left:34px;top:50%;width:20px;height:20px;margin:-10px;border-radius:50%;border:2px solid var(--ac);pointer-events:none;animation:burst .95s ease-out forwards}
+/* плитки: нахил, світло, стан */
+.tile{transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .15s ease-out,outline-color .18s;animation:rise .55s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*40ms)}
+.tile:hover,.tile:focus-visible{--ty:-5px;transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty))}
+.tile .dim{position:absolute;inset:0;background:var(--bg);opacity:calc(.45 - var(--lit,1)*.45);transition:opacity .35s;pointer-events:none}
+.tile:hover .dim,.tile:focus-visible .dim{opacity:0}
+.tile .gl2{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(200px circle at var(--gx,50%) var(--gy,0%),oklch(1 0 0/.24),transparent 60%)}
+.tile:hover .gl2{opacity:1}
+.tile.off img{filter:grayscale(.85) brightness(.85);transition:filter .5s}
+.tile:hover img,.tile:focus-visible img{filter:none}
+.tile.on::before{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--ac);box-shadow:0 0 16px 2px var(--ac);z-index:2}
+.tile .bdg{z-index:2}.tile .bdg::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--ac);animation:ping 1.8s ease-out infinite}
+/* сторінка гри: досьє */
+.gp{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:0 44px;align-items:start}
+.gm{display:flex;flex-direction:column;min-width:0}
+.gd{position:sticky;top:0;padding-top:34px}
+.cv{position:relative;aspect-ratio:2/3;border-radius:3px;overflow:hidden;background:oklch(.3 .09 var(--th));box-shadow:0 26px 60px -22px oklch(0 0 0/.65),0 0 0 1px var(--line);transform:perspective(800px) rotateY(-7deg);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.cv:hover{transform:perspective(800px) rotateY(0)}
+.cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cv .fb{position:absolute;inset:0;display:grid;place-items:center;font:700 96px var(--disp);color:oklch(.82 .12 var(--th)/.5)}
+.facts{margin-top:18px;font-size:13px}.facts div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
+.facts dt{color:var(--dim)}.facts dd{margin:0;text-align:right;overflow-wrap:anywhere}
+@media (max-width:1020px){.gp{grid-template-columns:1fr}.gd{display:none}}
+/* спокійний режим і reduced-motion */
+html[data-calm] .rv{opacity:1;transform:none}
+html[data-calm] .tile{transform:none!important}
+html[data-calm] .mk.big path{stroke-dashoffset:0}html[data-calm] .mk.big circle{opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}.rv{opacity:1;transform:none}}
+/* ===== заставка v2 ===== */
+#splash::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 38%,oklch(0 0 0/.5))}
+.sp-embers{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.sp-embers i{position:absolute;bottom:-10px;width:var(--s);height:var(--s);border-radius:50%;background:var(--ac);box-shadow:0 0 8px 1px var(--ac);opacity:0;animation:ember var(--t) var(--d) linear infinite}
+@keyframes ember{0%{transform:translate(0,0);opacity:0}12%{opacity:.9}100%{transform:translate(var(--dx),-105vh);opacity:0}}
+.sp-core{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center}
+.sp-ring{position:relative;width:200px;height:200px}
+.sp-ring .rg{position:absolute;inset:0;transform:rotate(-90deg)}
+.r0{fill:none;stroke:var(--line);stroke-width:2}
+.r1{fill:none;stroke:var(--ac);stroke-width:3;stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:553;filter:drop-shadow(0 0 6px var(--ac))}
+.sp-ring .mk.big{position:absolute;left:50%;top:50%;width:88px;height:88px;margin:-44px}
+.sp-rays{position:absolute;inset:-70%;pointer-events:none;background:repeating-conic-gradient(oklch(.85 .15 var(--h)/.15) 0 4deg,transparent 4deg 22.5deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 62%);mask-image:radial-gradient(circle,#000 0,transparent 62%);opacity:calc(.25 + var(--pr,0)*.0075);animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp-word{display:flex;gap:.18em;margin-top:22px;font:700 54px/1 var(--disp);font-variation-settings:"wdth" 80;letter-spacing:.2em}
+.sp-word i{font-style:normal;animation:rise .7s calc(.4s + var(--i)*.08s) cubic-bezier(.2,.7,.2,1) backwards}
+.sp-tag{margin-top:8px;color:var(--dim);font-size:13px;letter-spacing:.08em}
+.sp-n{margin-top:18px;font:700 64px/1 var(--disp);font-variation-settings:"wdth" 80;font-variant-numeric:tabular-nums}
+.sp-n small{font-size:.32em;color:var(--ac);margin-left:4px}
+.sp-steps{display:flex;gap:10px;margin:16px 0 0;padding:0}
+.sp-steps li{list-style:none;padding:4px 12px;font-size:12px;color:var(--dim);border:1px solid var(--line);border-radius:999px;transition:all .35s}
+.sp-steps li.act{color:var(--tx);border-color:var(--ac)}
+.sp-steps li.done{color:var(--onac);background:var(--ac);border-color:var(--ac)}
+.sp-steps li.done::before{content:"✓ "}
+.sp-tip{position:absolute;z-index:2;left:0;right:0;bottom:28px;text-align:center;color:var(--dim);font-size:13px}
+.sp-v{position:absolute;z-index:2;right:20px;bottom:10px;color:var(--dim);font-size:11px;opacity:.7}
+/* ===== головна: наповнення ===== */
+.hm{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0 36px;align-items:start}
+.hl,.hs{min-width:0}
+.hero{position:relative;height:270px;border-radius:4px;overflow:hidden;cursor:pointer;background:linear-gradient(120deg,oklch(.34 .13 var(--th)),oklch(.2 .06 var(--th)));box-shadow:0 0 0 1px var(--line),0 30px 60px -30px oklch(0 0 0/.7)}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.75;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.hero:hover img{transform:scale(1.05)}
+.hero::after,.gc::after{content:"";position:absolute;inset:0;pointer-events:none}
+.hero::after{background:linear-gradient(90deg,oklch(.12 .03 var(--th)/.92) 0,oklch(.12 .03 var(--th)/.55) 45%,transparent 80%)}
+.hero .fb,.gc .fb{position:absolute;right:30px;top:50%;transform:translateY(-50%);font:700 220px/1 var(--disp);color:oklch(.85 .12 var(--th)/.16)}
+.gc .fb{right:14px;font-size:110px}
+.hc{position:absolute;z-index:2;left:30px;bottom:26px;max-width:62%;color:#fff}
+.hg{display:inline-block;padding:3px 11px;border-radius:999px;background:var(--ac);color:var(--onac);font:600 12px var(--body)}
+.hc h2{font:700 56px/1 var(--disp);font-variation-settings:"wdth" 80;margin:12px 0 4px}
+.hc p{opacity:.82}.hb{display:flex;gap:22px;align-items:center;margin-top:16px}
+.hb .tl{color:#fff;border-bottom-color:oklch(1 0 0/.4)}
+.go.sm{flex:none;font-size:20px;padding:11px 22px}
+.gcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.gc{position:relative;aspect-ratio:460/215;border-radius:3px;overflow:hidden;cursor:pointer;background:linear-gradient(120deg,oklch(.32 .1 var(--th)),oklch(.22 .06 var(--th)));box-shadow:0 0 0 1px var(--line);transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s;animation:rise .55s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0)*60ms)}
+.gc:hover,.gc:focus-visible{transform:translateY(-4px);box-shadow:0 0 0 1px var(--ac),0 18px 40px -18px oklch(0 0 0/.7)}
+.gc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gc::after{background:linear-gradient(transparent 35%,oklch(.1 .02 var(--th)/.9))}
+.gi{position:absolute;z-index:2;left:12px;right:98px;bottom:10px;color:#fff;line-height:1.2}
+.gi b{display:block;font:600 17px var(--disp)}.gi span{font-size:12px;opacity:.78}
+.qa{position:absolute;z-index:2;right:10px;bottom:10px;padding:6px 12px;border-radius:3px;background:oklch(1 0 0/.16);color:#fff;font-size:12px;font-weight:600;transition:background .15s}
+.qa:hover{background:oklch(1 0 0/.3)}.qa.hot{background:var(--ac);color:var(--onac)}
+.pn{padding:18px;margin-bottom:14px;border:1px solid var(--line);border-radius:4px;background:color-mix(in oklab,var(--bg2) 55%,transparent)}
+.pn h3{font:600 12px var(--body);color:var(--dim);margin-bottom:10px}
+.hs .stats{margin:0;gap:24px}.hs .stats b{font-size:40px}
+.ur{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.ur b{display:block}.ur span{font-size:12px;color:var(--dim)}.ur .qa{position:static;background:var(--ac);color:var(--onac)}
+.pn .go.sm{width:100%;margin-top:12px}
+.pn .d{display:block;width:100%;text-align:left;padding:9px 0;border-top:1px solid var(--line);border-bottom:0;color:var(--tx);font-size:14px;text-decoration:none}
+.pn .d:hover{color:var(--ac)}
+/* каталог і сторінка гри */
+.pc{position:absolute;left:8px;top:8px;z-index:2;padding:2px 8px;border-radius:999px;background:oklch(0 0 0/.55);color:#fff;font:600 11px var(--body)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.chips2 span{padding:4px 11px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--dim);background:color-mix(in oklab,var(--bg) 70%,transparent)}
+@media (max-width:1020px){.hm{grid-template-columns:1fr}.hs{order:-1}}
+/* ===== стриманий режим: без курсорних ефектів ===== */
+@keyframes fadein{from{opacity:0}}
+.stage.enter>*:not(.gp):not(.hm),.stage.enter .gm>*,.stage.enter .gd>*,.stage.enter .hl>*,.stage.enter .hs>*{animation:fadein .22s ease both;animation-delay:0s}
+.bg .glow{animation:none}.bg .art{transform:none;transition:none}
+.go::after,.tile .bdg::after,.tile .dim,.tile .gl2{display:none}
+.tile,.gc{animation:none}
+.tile{transform:none;transition:transform .25s cubic-bezier(.2,.7,.2,1),outline-color .18s}
+.tile:hover,.tile:focus-visible{transform:translateY(-3px)}
+.bar .mk circle{animation:none}
+.title.idle.home{background:none;color:var(--tx);animation:none}
+.ri{transition:transform .28s cubic-bezier(.4,0,.2,1),height .2s}
+/* фон: вишивальний ромб */
+.pw{position:absolute;inset:0;-webkit-mask-image:linear-gradient(115deg,transparent 22%,#000 100%);mask-image:linear-gradient(115deg,transparent 22%,#000 100%)}
+.pat{position:absolute;inset:0;background:var(--ac);opacity:.11;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='1.4'%3E%3Cpath d='M24 3 45 24 24 45 3 24Z'/%3E%3Cpath d='M24 13 35 24 24 35 13 24Z'/%3E%3Cpath d='M24 3V0M24 45v3M3 24H0M45 24h3'/%3E%3Crect x='22' y='22' width='4' height='4' fill='black' stroke='none'/%3E%3C/svg%3E") 0 0/48px 48px repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='1.4'%3E%3Cpath d='M24 3 45 24 24 45 3 24Z'/%3E%3Cpath d='M24 13 35 24 24 35 13 24Z'/%3E%3Cpath d='M24 3V0M24 45v3M3 24H0M45 24h3'/%3E%3Crect x='22' y='22' width='4' height='4' fill='black' stroke='none'/%3E%3C/svg%3E") 0 0/48px 48px repeat}
+/* заставка: стримана */
+#splash::before{display:none}
+.sp-core{width:min(340px,80vw);display:flex;flex-direction:column;align-items:center;animation:fadein .9s ease both}
+.sp-core .mk.big{width:60px;height:60px}
+.mk.big circle{animation:ignite .6s 1s forwards}
+.sp-word{display:block;margin-top:28px;font:300 38px/1 var(--disp);font-variation-settings:"wdth" 100;letter-spacing:.55em;padding-left:.55em;color:var(--tx)}
+.sp-meta{display:flex;justify-content:space-between;width:100%;margin-top:48px;font-size:12px;color:var(--dim);letter-spacing:.04em}
+.sp-core .sp-n{margin:0;font:12px var(--body);font-variant-numeric:tabular-nums;color:var(--tx)}
+.sp-line{position:relative;width:100%;height:1px;margin-top:10px;background:var(--line)}
+.sp-line i{position:absolute;inset:0;background:var(--ac);transform-origin:left;transform:scaleX(0)}
+.sp-foot{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.06em;color:var(--dim)}
+/* підвал і сповіщення */
+.foot{justify-content:center;gap:10px;font-size:12px}
+.foot i{font-style:normal;opacity:.5}
+.foot .supbtn{margin:0;color:var(--dim)}.foot .supbtn:hover{color:var(--tx)}
+.toast{position:fixed;left:50%;bottom:46px;z-index:30;max-width:70vw;padding:9px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;font-size:13px;opacity:0;pointer-events:none;transform:translate(-50%,6px);transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.nw h4 a{color:inherit;text-decoration:none}.nw h4 a:hover{color:var(--ac)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--dim);background-clip:padding-box}
+/* ===== спрощення ===== */
+.hm{display:block;max-width:1120px}
+.upd{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 18px;margin-bottom:18px;border:1px solid var(--line);border-left:3px solid var(--ac);border-radius:4px;background:color-mix(in oklab,var(--bg2) 55%,transparent)}
+.upd b{font-weight:600}.upd span{color:var(--dim);font-size:13px}
+.sp-core .mk.big{width:72px;height:72px}
+.sp-line{width:220px;margin-top:34px}
+.sp-core .sp-n{margin-top:12px;color:var(--dim)}
+.dlc{margin:10px 0 0;color:var(--dim);font-size:13px}
+.gs{margin-top:38px;max-width:700px}
+.gs h3{font:600 13px var(--body);color:var(--dim);margin-bottom:14px}
+.trh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.trh b{font:600 20px var(--disp)}.trh span{font:700 20px var(--disp);color:var(--ac)}
+.pbar{height:4px;background:var(--line)}.pbar i{display:block;height:100%;background:var(--ac)}
+.gs .note{margin-top:14px;font-size:13px}
+.tm{display:flex;align-items:baseline;gap:20px;padding:10px 0;border-top:1px solid var(--line)}
+.tm b{min-width:160px}.tm span{flex:1;color:var(--dim)}
+.e li::before{display:none}
+.e li{display:grid;grid-template-columns:92px 1fr;gap:12px;padding-left:0}
+.e li .k{color:var(--dim);font-size:12px;padding-top:2px}
+/* ===== сповіщення ===== */
+#toasts{position:fixed;top:46px;right:18px;z-index:60;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 36px));pointer-events:none}
+.tst{pointer-events:auto;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:14px 12px 14px 16px;background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--ac);border-radius:4px;box-shadow:0 18px 44px -12px oklch(0 0 0/.6);font-size:14px;line-height:1.4;animation:tin .28s cubic-bezier(.2,.7,.2,1);transition:opacity .25s,transform .25s}
+.tst i{width:8px;height:8px;margin-top:6px;border-radius:50%;background:var(--ac)}
+.tst.err{border-left-color:oklch(.66 .2 25)}.tst.err i{background:oklch(.66 .2 25)}
+.tst.ok{border-left-color:oklch(.72 .15 150)}.tst.ok i{background:oklch(.72 .15 150)}
+.tst button{padding:0 6px;color:var(--dim);font-size:20px;line-height:1}.tst button:hover{color:var(--tx)}
+.tst.out{opacity:0;transform:translateX(24px)}
+@keyframes tin{from{opacity:0;transform:translateX(24px)}}
+.alert{font-size:14px;padding:14px 16px;border-left-width:4px}
+.warnline{color:var(--tx);padding-left:12px;border-left:3px solid var(--ac)}
+/* ===== модальне вікно ===== */
+dialog.md{width:min(880px,94vw);padding:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--bg2);color:var(--tx);box-shadow:0 40px 100px -20px oklch(0 0 0/.7)}
+dialog.md[open]{display:grid;grid-template-columns:300px 1fr;animation:fadein .2s ease}
+dialog.md::backdrop{background:oklch(0 0 0/.6)}
+.md-v{position:relative;min-height:470px;overflow:hidden;background:linear-gradient(160deg,oklch(.34 .12 var(--th,var(--h))),oklch(.17 .05 var(--th,var(--h))))}
+.md-v img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.md-v::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 45%,oklch(.1 .02 var(--th,var(--h))/.88))}
+.md-v .pat{opacity:.14}
+.md-v .mk{position:absolute;z-index:2;left:28px;top:26px;width:34px;height:34px}
+.md-cap{position:absolute;z-index:2;left:28px;right:24px;bottom:26px;color:#fff;font:600 26px/1.1 var(--disp)}
+.md-cap small{display:block;margin-top:6px;font:13px var(--body);opacity:.8}
+.md-r{position:relative;display:flex;flex-direction:column;gap:16px;padding:30px 32px}
+.md-r h2{font:600 26px/1.1 var(--disp)}
+.md-s{margin:-8px 0 0;color:var(--dim)}
+.md-x{position:absolute;top:10px;right:14px;font-size:24px;line-height:1;color:var(--dim)}.md-x:hover{color:var(--tx)}
+.fl label{display:block;margin-bottom:6px;font-size:12px;color:var(--dim)}
+.fl select,.fl textarea{width:100%;padding:9px 11px;background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--tx);font:14px var(--body)}
+.fl textarea{min-height:100px;resize:vertical}
+.fl select:focus,.fl textarea:focus{outline:0;border-color:var(--ac)}
+.md-e{min-height:18px;margin:-6px 0;font-size:13px;color:oklch(.7 .2 25)}.md-e.ok{color:oklch(.74 .15 150)}
+.md-b{display:flex;align-items:center;gap:22px}
+.md-r .lnk{align-self:flex-start;margin:0}
+@media (max-width:760px){dialog.md[open]{grid-template-columns:1fr}.md-v{display:none}}
+/* ===== модалка v3 і історія змін ===== */
+dialog.md{--mh:min(620px,90vh);width:min(900px,94vw)}
+dialog.md[open]{grid-template-columns:calc(var(--mh)*2/3) 1fr;height:var(--mh)}
+.md-v{min-height:0}
+.md-v::after,.md-cap{display:none}
+.md-v.has .mk,.md-v.has .pat{display:none}
+.md-v .mk{left:50%;top:50%;width:64px;height:64px;margin:-32px}
+.md-r{gap:14px;padding:26px 30px;overflow:auto}
+.fl textarea{min-height:84px}
+.dd{position:relative}
+.dd-b{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:4px;color:var(--tx);font:14px var(--body);text-align:left;transition:border-color .15s}
+.dd-b:hover,.dd-b[aria-expanded=true]{border-color:var(--ac)}
+.dd-b svg{width:12px;height:8px;fill:none;stroke:var(--dim);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.dd-b[aria-expanded=true] svg{transform:rotate(180deg)}
+.dd-l{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;margin:0;padding:4px;list-style:none;max-height:220px;overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:4px;box-shadow:0 18px 40px -12px oklch(0 0 0/.6)}
+.dd-l li{padding:9px 10px;border-radius:3px;cursor:pointer;font-size:14px}
+.dd-l li:hover,.dd-l li.act{background:var(--line)}
+.dd-l li[aria-selected=true]{color:var(--ac);font-weight:600}
+.e{grid-template-columns:120px 1fr}
+.e .d{color:var(--tx);font-size:14px}
+.e li{display:block;padding-left:0}
+.known{margin-top:18px;font-size:13px}
+.known b{display:block;margin-bottom:6px;color:var(--dim);font-weight:600}
+.known ul{margin:0;padding-left:16px}
+.gs .lnk{margin-top:6px}
+/* ===== v4: нейтральна основа, ширина, шкала, фірмовий орнамент ===== */
+:root{--k:1;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--t-s:13px;--t-m:15px;--t-l:20px}
+html[data-tint="neutral"]{--k:.22}
+html[data-tint="neutral"] .bg .glow{opacity:.5}
+html[data-tint="neutral"] .bg .tint{opacity:.22}
+html[data-tint="neutral"] .bg .art{opacity:.5}
+body{font-size:var(--t-m)}
+.stage{padding:34px max(52px,calc((100% - 1180px)/2)) 24px}
+.hm{max-width:none}
+.fh{margin:var(--s4) 0 var(--s2);font-size:var(--t-s)}
+.gs{margin-top:var(--s4)}.gs h3{font-size:var(--t-s);margin-bottom:var(--s2)}
+.sub{margin-top:var(--s2);gap:var(--s3);font-size:var(--t-m)}
+.studio,.note,.dlc,.facts,.known{font-size:var(--t-s)}
+.fh,.gs h3{display:flex;align-items:center;gap:14px}
+.fh::after,.gs h3::after{content:"";flex:1;height:10px;background:var(--ac);opacity:.3;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M10 1 15 5 10 9 5 5Z'/%3E%3Cpath d='M0 5h5M15 5h5'/%3E%3C/svg%3E") repeat-x left center/20px 10px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M10 1 15 5 10 9 5 5Z'/%3E%3Cpath d='M0 5h5M15 5h5'/%3E%3C/svg%3E") repeat-x left center/20px 10px}
+.empty{grid-column:1/-1;padding:48px 0;text-align:center;color:var(--dim)}
+.empty i{display:block;width:160px;height:10px;margin:0 auto 18px;background:var(--ac);opacity:.4;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M10 1 15 5 10 9 5 5Z'/%3E%3Cpath d='M0 5h5M15 5h5'/%3E%3C/svg%3E") repeat-x center/20px 10px;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10' viewBox='0 0 20 10' fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M10 1 15 5 10 9 5 5Z'/%3E%3Cpath d='M0 5h5M15 5h5'/%3E%3C/svg%3E") repeat-x center/20px 10px}
+.mk .fl{fill:currentColor;stroke:none}
+.mk.big .fl{opacity:0;animation:ignite .6s 1s forwards}
+html[data-calm] .mk.big .fl{opacity:1}
+.gcs{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.cv,.cv:hover{transform:none}
+.mk{stroke-width:3.8}.mk.big{stroke-width:3.2}
+/* ===== v5: плоский інтерфейс ===== */
+:root{--bg:oklch(.965 .003 260);--bg2:oklch(1 0 0);--sf3:oklch(.93 .004 260);--tx:oklch(.2 .006 260);--dim:oklch(.2 .006 260/.62);--line:oklch(.2 .006 260/.09);--r1:10px;--r2:16px;--r3:22px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:oklch(.145 .004 260);--bg2:oklch(.2 .004 260);--sf3:oklch(.255 .005 260);--tx:oklch(.96 .004 260);--dim:oklch(.96 .004 260/.62);--line:oklch(.96 .004 260/.1)}}
+:root[data-theme="dark"]{--bg:oklch(.145 .004 260);--bg2:oklch(.2 .004 260);--sf3:oklch(.255 .005 260);--tx:oklch(.96 .004 260);--dim:oklch(.96 .004 260/.62);--line:oklch(.96 .004 260/.1)}
+.pw,.gl,.grain,.bg .glow{display:none}
+.fh::after,.gs h3::after{display:none}
+.app{grid-template-rows:56px 1fr 30px}
+.bar{display:grid;grid-template-columns:1fr minmax(240px,540px) 1fr;align-items:center;height:56px;padding:0 0 0 20px;color:var(--tx)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mk{width:26px;height:26px}
+.brand b{font:700 22px/1 var(--disp);letter-spacing:.01em;color:var(--tx)}
+.bar-r{display:flex;justify-content:flex-end;align-items:center;gap:14px}
+.wc button{height:56px;width:48px}
+.sb{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;background:var(--sf3);border-radius:12px;color:var(--dim);cursor:text}
+.sb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.sb input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--tx);font:15px var(--body)}
+.sb:focus-within{box-shadow:0 0 0 2px var(--ac)}
+.sb kbd{padding:1px 8px;border-radius:6px;background:var(--line);font:12px var(--body)}
+.pill{padding:9px 18px;border-radius:999px;background:var(--ac);color:var(--onac);font:600 14px var(--body)}
+.pill:hover{filter:brightness(1.08)}.pill[hidden]{display:none}
+#splash{inset:56px 0 0 0}
+#toasts{top:68px}
+.tst{border-radius:14px}
+.main{grid-template-columns:72px 1fr}
+nav{width:72px;padding:12px 0;border-right:0;background:var(--bg)}
+html[data-rail=hover] nav:hover,nav:has(:focus-visible){width:220px}
+nav .g{width:auto;height:48px;margin:0 12px 4px;padding:0 12px;border-radius:12px;gap:16px;box-shadow:none}
+nav .g:hover{background:var(--sf3)}
+nav .g[aria-current=true]{background:var(--sf3);color:var(--tx);box-shadow:none}
+.ri{display:none}
+.stage{padding:8px max(40px,calc((100% - 1240px)/2)) 28px}
+.h2{margin:0 0 18px;font:700 30px/1.1 var(--disp)}
+.h2r{display:flex;align-items:baseline;justify-content:space-between;margin:44px 0 18px}.h2r .h2{margin:0}
+.hn{margin-top:44px}
+.tl{font-size:14px}
+/* карусель */
+.car{--sw:min(780px,66vw);position:relative}
+.cr{position:relative;display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:0 calc((100% - var(--sw))/2)}
+.cr::-webkit-scrollbar{display:none}
+.sl{position:relative;flex:0 0 var(--sw);height:340px;border-radius:var(--r3);overflow:hidden;scroll-snap-align:center;cursor:pointer;background:linear-gradient(120deg,oklch(.3 .08 var(--th)),oklch(.17 .03 var(--th)));opacity:.45;filter:saturate(.6);transition:opacity .3s,filter .3s}
+.sl.on{opacity:1;filter:none}
+.sl .fb{position:absolute;right:36px;top:50%;transform:translateY(-50%);font:700 200px/1 var(--disp);color:oklch(.85 .1 var(--th)/.16)}
+.sl .bgimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sl::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 28%,oklch(.08 0 0/.88))}
+.sc{position:absolute;z-index:2;left:28px;right:28px;bottom:26px;color:#fff}
+.sth{display:block;width:46px;height:62px;margin-bottom:12px;border-radius:8px;object-fit:cover;box-shadow:0 8px 20px oklch(0 0 0/.5)}
+.sc h3{margin:0;font:700 38px/1.05 var(--disp)}
+.sc p{margin:6px 0 16px;color:oklch(1 0 0/.82)}
+.go.pl{flex:none;min-width:0;border-radius:999px;padding:13px 28px;font:600 17px var(--body)}
+.cn{position:absolute;top:50%;z-index:3;display:grid;place-items:center;width:48px;height:48px;margin-top:-24px;border-radius:50%;background:oklch(0 0 0/.6);color:#fff}
+.cn:hover{background:oklch(0 0 0/.8)}.cn.prev{left:12px}.cn.next{right:12px}
+.cn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cd{position:absolute;z-index:3;bottom:24px;right:calc((100% - var(--sw))/2 + 26px);display:flex;gap:8px}
+.cd i{width:8px;height:8px;border-radius:4px;background:oklch(1 0 0/.4);transition:width .25s,background .25s}
+.cd i.on{width:34px;background:#fff}
+/* плитки: підпис завжди видно, невстановлені сірі */
+.prow{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.prow::-webkit-scrollbar{display:none}
+.prow .tile{flex:0 0 180px}
+.tile{border-radius:var(--r1)}
+.tile .nm{opacity:1;transform:none;padding:48px 12px 12px;font:700 16px/1.15 var(--body)}
+.tile .nm small{font-weight:500}
+.tile.off img{filter:grayscale(.9) brightness(.72)}
+.tile.on::before{display:none}
+.tile .bdg{top:10px;right:10px;left:auto;width:auto;height:auto;padding:3px 10px;border-radius:999px;background:var(--ac);color:var(--onac);box-shadow:none;font:600 11px var(--body)}
+/* новини */
+.ng{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.nc{display:block;padding:20px;border-radius:var(--r2);background:var(--bg2);color:var(--tx);text-decoration:none;transition:background .2s}
+.nc:hover{background:var(--sf3)}
+.nc .nm2{display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--dim)}
+.nc .nm2 b{color:var(--ac);font-weight:600}
+.nc h4{margin:0 0 8px;font:700 18px/1.25 var(--body)}
+.nc p{margin:0;color:var(--dim);font-size:13px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* сторінка гри */
+.title{font-size:clamp(44px,6.2vw,88px)}
+.act{width:auto}
+.go{flex:none;min-width:260px;border-radius:999px;padding:15px 32px;text-align:center;font:600 20px var(--body)}
+.go.sm{min-width:0;font-size:17px;padding:12px 24px}
+.cv{border-radius:var(--r2)}
+.facts{padding:4px 18px;background:var(--bg2);border-radius:var(--r2)}.facts div:last-child{border-bottom:0}
+.e{padding:16px 20px;margin-bottom:10px;background:var(--bg2);border:0;border-radius:var(--r2)}
+.ba{border-radius:var(--r2)}
+/* налаштування, модалка, поля */
+.st-body{padding:4px 26px;background:var(--bg2);border-radius:var(--r3)}
+.st-body h2{padding:20px 0 10px;border:0}
+.seg{border-radius:10px}
+.dd-b,.fl textarea{border-radius:12px}
+dialog.md{border-radius:22px}
+.car{--sw:min(840px,74%)}
+.cr{padding:0}
+.sl{scroll-snap-align:start}
+.sl .cd{right:24px;bottom:24px}
+/* ===== виправлення за скриншотами ===== */
+.brand,.sb,#updbtn{transition:opacity .45s}
+body.loading .brand,body.loading .sb,body.loading #updbtn{opacity:0;pointer-events:none}
+.sl.one{display:block;flex:none;width:100%;height:380px;opacity:1;filter:none}
+.sl.one .sc{left:36px;bottom:34px}
+.sl.one .sc h3{font-size:46px}
+/* бічна панель: значок із підписом, без розкриття */
+.main{grid-template-columns:96px 1fr}
+nav,html[data-rail=hover] nav:hover,html[data-rail=fixed] nav:hover,nav:has(:focus-visible){width:96px;box-shadow:none}
+nav{padding:10px 0}
+nav .g{flex-direction:column;justify-content:center;gap:6px;height:62px;margin:0 8px 6px;padding:0;border-radius:14px}
+.g .lb{opacity:1;transform:none;font-size:10.5px;line-height:1;letter-spacing:0}
+nav .g[aria-current=true] .lb{color:var(--tx)}
+/* без сірих підкладок навколо тексту */
+.facts{padding:0;background:none;border-radius:0}.facts div:last-child{border-bottom:1px solid var(--line)}
+.e{padding:14px 0;margin:0;background:none;border:0;border-top:1px solid var(--line);border-radius:0}
+.st-body{padding:0;background:none;border-radius:0}
+.st-body h2{padding:0 0 12px;border-bottom:1px solid var(--line)}
+/* ===== v6: виправлення вирівнювання ===== */
+.mk{color:#f2b84b}
+.brand{gap:11px}
+.logo{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:#221a14;box-shadow:inset 0 0 0 1px oklch(1 0 0/.09)}
+.logo .mk{width:24px;height:24px}
+.brand b{display:block;font:700 21px/1 var(--disp);letter-spacing:.01em;text-box:trim-both cap alphabetic}
+/* бічна панель: однакове центрування, без зсуву активного пункту */
+nav .g,nav .g[aria-current=true]{padding:0;align-items:center}
+.g .ic{margin:0}
+.g .lb{width:100%;text-align:center}
+/* плитки: наведення без обрізання зверху, колір повертається */
+.prow{padding:10px 4px 18px;margin:-10px -4px -18px}
+.tile:hover,.tile:focus-visible{transform:translateY(-4px);outline:0;box-shadow:0 18px 34px -14px oklch(0 0 0/.75)}
+.tile:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.tile.off:hover img,.tile.off:focus-visible img{filter:none}
+/* таймлайн: лінія й кружки мають спільний центр */
+.feed::before{left:5px;width:2px}
+.feed .nw::before{left:-28px;width:12px;height:12px}
+/* ===== v7: шви, таймлайн, плитки ===== */
+*::before,*::after{box-sizing:border-box}
+.feed .nw::before{top:4px}
+.nw h4{font-size:22px}.nw.top h4{font-size:30px}
+.tile:has(img){background:oklch(.13 .005 260)}
+.tile:has(img) .fb{display:none}
+.tile .pic{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.tile .pic img{inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);max-width:none}
+.tile.off img,.tile.off:hover img,.tile.off:focus-visible img{filter:none}
+.tile.off .pic{filter:grayscale(.9) brightness(.72);transition:filter .35s}
+.tile.off:hover .pic,.tile.off:focus-visible .pic{filter:none}
+/* ===== v8: нова заставка, без підвалу ===== */
+.app{grid-template-rows:56px 1fr}
+#splash::before{display:block;content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(560px circle at var(--lx,50%) var(--ly,50%),oklch(.8 .16 75/.15),transparent 70%)}
+.sp-core{width:auto}
+.sp-core .mk.big{width:72px;height:72px;filter:drop-shadow(0 0 14px oklch(.8 .16 75/.45))}
+.sp-lines{display:grid;justify-items:start;gap:4px;margin-top:34px}
+.tr{position:relative;display:grid;font:700 clamp(38px,6.2vw,74px)/1.14 var(--disp);font-variation-settings:"wdth" 78;letter-spacing:.07em;text-transform:uppercase}
+.tr span{grid-area:1/1;white-space:nowrap;text-align:left}
+.tr .en{color:oklch(1 0 0/.2);clip-path:inset(0 0 0 calc(var(--p)*100%))}
+.tr .ua{color:#f4eee4;clip-path:inset(0 calc((1 - var(--p))*100%) 0 0)}
+.tr:last-child .ua{color:#f2b84b}
+.tr .fr{position:absolute;top:10%;bottom:10%;left:calc(var(--p)*100%);width:2px;margin-left:-1px;background:linear-gradient(transparent,#f2b84b 30%,#f2b84b 70%,transparent);box-shadow:0 0 22px 5px oklch(.8 .16 75/.5);opacity:0;transition:opacity .25s}
+.tr.on .fr{opacity:1}
+.sp-core .sp-n{margin-top:28px;font-size:12px;color:var(--dim)}
+@media (max-width:760px){.stage{padding:22px 20px}.st{grid-template-columns:1fr}.st-nav{flex-direction:row;overflow-x:auto;border:0;position:static}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="loading">
+<div class="app">
+  <div class="bg" id="bg"></div>
+  <header class="bar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><span class="logo" data-tauri-drag-region><svg class="mk" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 19c0-10 16-10 16 0"/><path d="M20 26l4-7h16l4 7z"/><path d="M22 26v22M42 26v22"/><path d="M19 48h26l-2 6H21z"/><path class="fl" d="M32 29c3 3.2 4.5 5.6 4.5 8a4.5 4.5 0 0 1-9 0c0-2.4 1.5-4.8 4.5-8z"/></svg></span><b data-tauri-drag-region>Ліхтар</b></div>
+    <label class="sb"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="gs" type="search" placeholder="Пошук ігор" autocomplete="off" aria-label="Пошук ігор"><kbd>/</kbd></label>
+    <div class="bar-r" data-tauri-drag-region><span id="dock"></span><button class="pill" id="updbtn" hidden></button><div class="wc"><button id="min" aria-label="Згорнути">&#8212;</button><button id="cls" class="x" aria-label="Закрити">&#10005;</button></div></div>
+  </header>
+  <div class="main">
+    <nav id="rail" aria-label="Основна навігація"><i class="ri" id="ri"></i><div class="list" id="list"></div></nav>
+    <section class="stage" id="stage" aria-live="polite"></section>
+  </div>
+  
+</div>
+<button id="sup" hidden aria-hidden="true" tabindex="-1"></button>
+<div id="toasts" aria-live="polite"></div>
+<div id="splash"><div class="sp-core">
+  <svg class="mk big" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 19c0-10 16-10 16 0"/><path d="M20 26l4-7h16l4 7z"/><path d="M22 26v22M42 26v22"/><path d="M19 48h26l-2 6H21z"/><path class="fl" d="M32 29c3 3.2 4.5 5.6 4.5 8a4.5 4.5 0 0 1-9 0c0-2.4 1.5-4.8 4.5-8z"/></svg>
+  <div class="sp-lines" id="sp-ln"><div class="tr" style="--p:0"><span class="en">CATALOG</span><span class="ua">Каталог</span><i class="fr"></i></div><div class="tr" style="--p:0"><span class="en">PATHS</span><span class="ua">Шляхи</span><i class="fr"></i></div><div class="tr" style="--p:0"><span class="en">GAMES</span><span class="ua">Ігри</span><i class="fr"></i></div><div class="tr" style="--p:0"><span class="en">UPDATES</span><span class="ua">Оновлення</span><i class="fr"></i></div><div class="tr" style="--p:0"><span class="en">READY</span><span class="ua">Готово</span><i class="fr"></i></div></div>
+  <div class="sp-n"><span id="sp-n">0</span>%</div>
+</div></div>
+<dialog id="dlg" class="md">
+  <div class="md-v" id="md-v"><div class="pat"></div>
+    <svg class="mk" viewBox="0 0 64 64" aria-hidden="true"><path d="M24 19c0-10 16-10 16 0"/><path d="M20 26l4-7h16l4 7z"/><path d="M22 26v22M42 26v22"/><path d="M19 48h26l-2 6H21z"/><path class="fl" d="M32 29c3 3.2 4.5 5.6 4.5 8a4.5 4.5 0 0 1-9 0c0-2.4 1.5-4.8 4.5-8z"/></svg></div>
+  <div class="md-r">
+    <button class="md-x" id="dclose" aria-label="Закрити">×</button>
+    <h2>Повідомити про проблему</h2>
+    <p class="md-s">Напишіть, що сталося. Дані про систему додамо самі.</p>
+    <div class="fl"><label>Що не так</label><div class="dd" id="dd-t"></div></div>
+    <div class="fl"><label>Гра</label><div class="dd" id="dd-g"></div></div>
+    <div class="fl"><label for="md-d">Опис</label><textarea id="md-d" rows="4" placeholder="Наприклад: у меню налаштувань частина тексту англійською"></textarea></div>
+    <label class="chk"><input type="checkbox" id="md-c" checked> Додати версію Ліхтаря та дані про систему</label>
+    <div class="md-e" id="md-e"></div>
+    <div class="md-b"><button class="go sm" id="md-mail"><span>Надіслати на пошту</span></button><button class="tl" id="md-gh">Створити звернення на GitHub</button></div>
+    <button class="lnk" id="dlog">Скопіювати журнал</button>
+  </div>
+</dialog>
+<script>
+const T = window.__TAURI__, DEMO = !T?.core;
+const SUPPORT = {email:'your@email.com', issues:'https://github.com/USER/lichtar/issues'};
+/* Віддалений каталог (GitHub raw). Порожньо = беремо вбудований BUNDLED нижче. */
+const CATALOG_URL = '';
+/* Живі стрічки новин (RSS). З кожної беруться лише матеріали про українізацію. */
+const NEWS_FEEDS = [{name:'Таємна кімната', url:'https://tayemnakimnata.com/feed/'}, {name:'УНІАН', url:'https://rss.unian.net/site/news_ukr.rss'}];
+const NEWS_RE = /українізатор|локалізац|українськ(а|у|ою|ої)\s+мов|переклад\S*\s+українськ/i;
+const MONTHS = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+/* Адреса збору анонімної статистики (порожньо = нічого не надсилається) */
+const STATS_URL = '';
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* У програмі (Tauri) усе реальне. Лише в браузерному прев'ю працює мінімальне демо. */
+const demo = async (c,a) => { await sleep(120);
+  const m = {get_paths:{}, installed_versions:{gunbrella:{version:'0.9.0',build:null}}, verify_install:{missing:[],changed:[]}, game_build:null, startup_link:null, read_log:'(демо) подій ще немає', log_event:null, cancel_install:null, post_json:null, validate_game_dir:true, pick_folder:'D:\\Games\\Custom', set_path:null, open_folder:null, rollback:null, play_game:null, storage_info:{log:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar\\lichtar.log',dir:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar',backups:48230000,cache:3100000}, clear_cache:3100000};
+  if (c==='detect_game') return a.exes[0]==='BloodWest.exe' ? 'D:\\Games\\Blood West' : a.exes[0]==='Gunbrella.exe' ? 'D:\\Games\\Gunbrella' : null;
+  if (c in m) return m[c];
+  throw "Прев'ю: ця дія працює лише в програмі"; };
+const call = (c,a) => DEMO ? demo(c,a) : T.core.invoke(c,a);
+const win = T?.window?.getCurrentWindow?.();
+$('#min').onclick = () => win?.minimize();
+$('#cls').onclick = () => win?.close();
+
+/* ---- вбудований каталог. У релізі його замінює catalog.json з GitHub / адмінки ---- */
+/* Вбудований резервний каталог (для першого запуску без мережі). Генерується: python tools/sync_bundled.py */
+/*BUNDLED:start*/
+const BUNDLED = {
+  "news": [
+    {
+      "d": "Серпень 2026",
+      "ts": "2026-08-18",
+      "tag": "Tribuna",
+      "t": "У Steam стартував Ukrainian Games Festival 2026",
+      "x": "Фестиваль українських розробників тривав до 24 серпня, уперше з показом трейлерів UGF Direct.",
+      "u": "https://ua.tribuna.com/uk/amp/cybersport/1000000368911-u-steam-rozpochavsya-ukrainian-games-festival-2026/"
+    },
+    {
+      "d": "12 липня",
+      "ts": "2026-07-12",
+      "tag": "Таємна кімната",
+      "t": "Для Crimson Desert вийшов повний українізатор",
+      "x": "Понад 172 тисячі рядків. Переклад вмикається через слот польської мови, англійський текст лишається на місці. Лежить на Nexus Mods.",
+      "u": "https://tayemnakimnata.com/dlya-crimson-desert-na-pc-vyjshov-povnoczinnyj-ukrayinizator/"
+    },
+    {
+      "d": "Червень 2026",
+      "ts": "2026-06-08",
+      "tag": "УНІАН",
+      "t": "П’ять ігор з українською, що вийдуть у другій половині 2026 року",
+      "x": "У добірці Control Resonant, Valor Mortis і Resonance: A Plague Tale Legacy.",
+      "u": "https://www.unian.ua/techno/games/igri-z-ukrajinskim-perekladom-top-5-golovnih-novih-igor-lita-oseni-2026-roku-13406091.html"
+    },
+    {
+      "d": "9 квітня",
+      "ts": "2026-04-09",
+      "tag": "УНІАН",
+      "t": "Control Resonant отримає офіційну українську локалізацію",
+      "x": "Українська буде в інтерфейсі та субтитрах, без озвучення.",
+      "u": "https://www.unian.ua/techno/games/control-resonant-data-vihodu-u-gri-bude-ukrajinska-lokalizaciya-13343853.html"
+    }
+  ],
+  "games": [
+    {
+      "id": "blood-west",
+      "name": "Blood West",
+      "studio": "Hyperstrange",
+      "hue": 25,
+      "steam_appid": 1587130,
+      "exe": [
+        "BloodWest.exe"
+      ],
+      "folders": [
+        "Blood West",
+        "BloodWest"
+      ],
+      "version": "",
+      "size": "",
+      "url": "",
+      "sha256": "",
+      "log": [],
+      "_note": "exe і назву теки не перевірено: запустіть tools/inspect_game.py на встановленій грі"
+    },
+    {
+      "id": "gunbrella",
+      "name": "Gunbrella",
+      "studio": "Doinksoft",
+      "hue": 178,
+      "steam_appid": 1580180,
+      "exe": [
+        "Gunbrella.exe"
+      ],
+      "folders": [
+        "Gunbrella"
+      ],
+      "version": "",
+      "size": "",
+      "url": "",
+      "sha256": "",
+      "log": [],
+      "_note": "exe і назву теки не перевірено: запустіть tools/inspect_game.py на встановленій грі"
+    },
+    {
+      "id": "gunfire",
+      "name": "Gunfire Reborn",
+      "studio": "Duoyi",
+      "hue": 75,
+      "steam_appid": 1217060,
+      "exe": [
+        "Gunfire Reborn.exe"
+      ],
+      "folders": [
+        "Gunfire Reborn"
+      ],
+      "version": "",
+      "size": "",
+      "url": "",
+      "sha256": "",
+      "log": [],
+      "_note": "exe і назву теки не перевірено: запустіть tools/inspect_game.py на встановленій грі"
+    },
+    {
+      "id": "watch-dogs",
+      "name": "Watch Dogs",
+      "studio": "Ubisoft",
+      "hue": 255,
+      "steam_appid": 243470,
+      "exe": [
+        "Watch_Dogs.exe"
+      ],
+      "folders": [
+        "Watch_Dogs",
+        "Watch Dogs"
+      ],
+      "version": "",
+      "size": "",
+      "url": "",
+      "sha256": "",
+      "log": [],
+      "_note": "exe і назву теки не перевірено: запустіть tools/inspect_game.py на встановленій грі"
+    }
+  ]
+};
+/*BUNDLED:end*/
+
+const HOME = {id:'home',home:true,name:'Ліхтар',hue:75};
+let featuredId = null, recovered = [];
+let games = [HOME], news = [], sel = 0, view = 'home', busy = null, armed = false, q = '', flt = 'all', catSource = 'вбудований';
+const PK = 'lichtar.prefs';
+const DEF = {mode:'auto',tint:'neutral',accent:75,closeOnPlay:false,autoUpdate:true,stats:false,steamBg:true,calm:false,railHover:true,autoCatalog:true,confirmRollback:true,catalogUrl:''};
+const prefs = Object.assign({}, DEF, (()=>{ try { return JSON.parse(localStorage.getItem(PK)) || {}; } catch { return {}; } })());
+const savePrefs = () => { try { localStorage.setItem(PK, JSON.stringify(prefs)); } catch {} };
+const applyTheme = () => { const r = document.documentElement; prefs.mode === 'auto' ? r.removeAttribute('data-theme') : r.setAttribute('data-theme', prefs.mode); r.toggleAttribute('data-calm', !!prefs.calm); r.dataset.rail = prefs.railHover ? 'hover' : 'fixed'; r.dataset.tint = prefs.tint; };
+const hueOf = g => prefs.accent === 'game' ? (g.hue ?? 75) : prefs.accent;
+const okImg = u => /^https?:\/\//i.test(u || '') || /^data:image\/(svg\+xml|png|jpe?g|webp)/i.test(u || '');
+const safeUrl = u => /^https?:\/\//i.test(u || '') ? u : '';
+const go = (v, i) => { view = v; if (v !== 'games') { q = ''; const g0 = document.getElementById('gs'); if (g0) g0.value = ''; } if (i != null) sel = i; armed = false; render(); };
+const state = g => g.home ? 'home' : !g.path ? 'path' : !g.cur ? 'install' : g.cur !== g.version ? 'update' : g.issue ? 'repair' : 'ready';
+const label = {path:'Вказати теку гри',install:'Встановити',update:'Оновити',repair:'Відновити',ready:'Грати'};
+const KIND_ERR = /^(Помилка|Не вдалося|Файл «|Мало місця|У цій теці немає|Лише в програмі)|не знайдено|патча ще немає/i;
+const KIND_OK = /встановлено|скопійовано|збережено|оновлено|повернуто|скинуто|Знайдено/i;
+function notify(t, kind){
+  kind = kind || (KIND_ERR.test(t) ? 'err' : KIND_OK.test(t) ? 'ok' : 'info');
+  const box = $('#toasts'), el = document.createElement('div');
+  el.className = 'tst ' + kind; el.setAttribute('role', 'status');
+  el.innerHTML = '<i></i><span></span><button aria-label="Закрити">×</button>';
+  el.querySelector('span').textContent = t;
+  const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 250); };
+  el.querySelector('button').onclick = kill;
+  let tm = setTimeout(kill, kind === 'err' ? 8000 : 5000);
+  el.onmouseenter = () => clearTimeout(tm); el.onmouseleave = () => { tm = setTimeout(kill, 2500); };
+  box.append(el); while (box.children.length > 4) box.firstChild.remove();
+}
+const setStatus = t => notify(t);
+
+
+/* ---- завантаження: реальні кроки, але не швидше ~4 секунд ---- */
+let target = 0, stage = 'Запуск';
+const mark = (n,t) => { target = n/4; stage = t; };
+async function load(force = false){
+  try {
+    stage = 'Читаю каталог';
+    let cat = BUNDLED;
+    catSource = 'вбудований';
+    const url = prefs.catalogUrl || CATALOG_URL;
+    const fromCache = () => { try { const c = JSON.parse(localStorage.getItem('lichtar.catalog')); if (Array.isArray(c?.games)) { cat = c; catSource = 'збережена копія'; return true; } } catch {} return false; };
+    if (url && (prefs.autoCatalog || force)) {
+      try { const r = JSON.parse(await call('fetch_text',{url})); if (!Array.isArray(r.games)) throw new Error('некоректний каталог'); cat = r; catSource = 'GitHub'; try { localStorage.setItem('lichtar.catalog', JSON.stringify(r)); } catch {} }
+      catch(e){ console.warn('каталог', e); if (fromCache()) catSource = 'збережена копія, немає мережі'; }
+    } else if (url) fromCache();
+    mark(1,'Читаю збережені шляхи');
+    const rec = await call('recover_pending').catch(() => []);
+    recovered = rec || [];
+    const [paths, vers] = await Promise.all([call('get_paths'), call('installed_versions')]);
+    mark(2,'Шукаю ігри на комп’ютері');
+    games = [HOME, ...cat.games]; news = cat.news || []; featuredId = cat.featured || null;
+    await Promise.all(games.slice(1).map(async g => {
+      g.cur = vers[g.id]?.version || null; g.curBuild = vers[g.id]?.build || null;
+      const saved = paths[g.id];
+      const ok = saved && await call('validate_game_dir',{dir:saved,exes:g.exe||[]}).catch(()=>false);
+      g.path = ok ? saved : await call('detect_game',{appid:g.steam_appid ?? null,gogId:g.gog_id ?? null,exes:g.exe||[],folders:g.folders||[g.name]}).catch(()=>null);
+      if (g.path && !ok) call('set_path',{id:g.id,path:g.path}).catch(()=>{});
+      await health(g);
+    }));
+    mark(3,'Звіряю версії');
+    await sleep(200);
+    mark(4,'Готово');
+  } catch(e){ console.error(e); if (games.length < 2) { games = [HOME, ...BUNDLED.games]; news = BUNDLED.news; } }
+}
+async function liveNews(){
+  const out = [];
+  await Promise.all(NEWS_FEEDS.map(async f => { try {
+    const doc = new DOMParser().parseFromString(await call('fetch_text',{url:f.url}), 'text/xml');
+    doc.querySelectorAll('item').forEach(it => {
+      const t = it.querySelector('title')?.textContent?.trim(), l = it.querySelector('link'), u = (l?.textContent || l?.getAttribute('href') || '').trim(), dt = new Date(it.querySelector('pubDate')?.textContent);
+      if (!t || !u || isNaN(dt) || !NEWS_RE.test(t)) return;
+      out.push({ts: dt.toISOString().slice(0,10), d: `${dt.getDate()} ${MONTHS[dt.getMonth()]}`, tag: f.name, t, u});
+    });
+  } catch {} }));
+  return out;
+}
+async function refreshNews(){
+  const live = await liveNews(); if (!live.length) return;
+  news = [...live, ...news.filter(n => !live.some(l => l.u === n.u))].sort((a,b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 12);
+  if (view === 'home') render();
+}
+async function splash(){
+  document.documentElement.style.setProperty('--h', 75);
+  const t0 = performance.now(), MIN = 4200, el = $('#splash'), num = $('#sp-n'), lines = [...document.querySelectorAll('#sp-ln .tr')], N = lines.length;
+  let fin = false, shown = 0;
+  const p = load().then(()=>fin = true);
+  await new Promise(res => (function tick(){
+    const tm = Math.min(1,(performance.now()-t0)/MIN);
+    const cap = Math.min(1-Math.pow(1-tm,1.6), fin ? 1 : target);
+    shown += (cap-shown)*.2; if (fin && tm >= 1) shown = 1;
+    num.textContent = Math.round(shown*100); lines.forEach((ln, i) => { const p = Math.max(0, Math.min(1, shown * N - i)); ln.style.setProperty('--p', p.toFixed(4)); ln.classList.toggle('on', p > 0 && p < 1); });
+    const cur = lines.find(l => l.classList.contains('on')) || lines[Math.min(N - 1, Math.floor(shown * N))], rc = cur.getBoundingClientRect(), pp = parseFloat(cur.style.getPropertyValue('--p'));
+    el.style.setProperty('--lx', (rc.left + rc.width * pp) + 'px'); el.style.setProperty('--ly', (rc.top + rc.height / 2 - 56) + 'px');
+    shown >= .999 ? res() : requestAnimationFrame(tick);
+  })());
+  await p; lines.forEach(l => { l.style.setProperty('--p', 1); l.classList.remove('on'); }); await sleep(380); lastKey = ''; render();
+  document.body.classList.remove('loading'); el.classList.add('out'); await sleep(550); el.remove();
+  call('startup_link').then(u => u && openLink(u)).catch(()=>{});
+  refreshNews();
+  if (recovered.length) notify('Гру повернено до початкового стану після перерваного встановлення: ' + recovered.join(', '), 'ok');
+  if (prefs.autoUpdate) checkSelf(false);
+}
+
+/* ---- прогрес встановлення з Rust ---- */
+const phases = {download:[0,55,'Завантажую'], verify:[55,62,'Перевіряю SHA256'], extract:[62,100,'Бекап і розпаковка']};
+T?.event?.listen('progress', ({payload:p}) => { const r = phases[p.phase]; if (p.id === busy && r) paint(r[0]+(r[1]-r[0])*p.pct/100, r[2]); });
+let job = null, queue = [], selfUpd = null, logPath = '';
+function dock(){
+  const d = $('#dock'); if (!d) return;
+  const sig = (job ? job.id + queue.length : '-') + (selfUpd ? selfUpd.version : '');
+  if (d.dataset.sig !== sig) {
+    d.dataset.sig = sig;
+    d.innerHTML = (job ? `<button class="dk" id="dk"><span id="dkn"></span><span class="dkb"><i id="dkp"></i></span></button><button class="tl" id="dkx">Скасувати</button>${queue.length?`<span>у черзі: ${queue.length}</span>`:''}` : '')
+      + (selfUpd ? `<button class="tl" id="su">Оновити Ліхтар до ${esc(selfUpd.version)}</button>` : '');
+    $('#dk')?.addEventListener('click', () => go('game', games.findIndex(x=>x.id===job.id)));
+    $('#dkx')?.addEventListener('click', () => call('cancel_install',{id:job.id}));
+    $('#su')?.addEventListener('click', applySelf);
+  }
+  if (job) { const g = games.find(x=>x.id===job.id); $('#dkn').textContent = `${g?.name} ${Math.round(job.pct)}%`; $('#dkp').style.width = job.pct+'%'; }
+}
+function paint(p, txt){
+  if (job) { job.pct = p; job.txt = txt; }
+  dock();
+  if (!(job && view === 'game' && games[sel]?.id === job.id)) return;
+  $('#t')?.style.setProperty('--p', p); $('#go')?.style.setProperty('--f', p/100);
+  const s = $('#go span'); if (s) s.textContent = Math.round(p)+'%';
+  const m = $('#meta'); if (m) m.innerHTML = `<span class="note">${txt}</span>`;
+}
+
+/* ---- фон: обкладинка зі Steam, якщо вона є ---- */
+let artTok = 0;
+function drawBg(g){
+  const tok = ++artTok, base = '<div class="glow"></div><div class="pw"><div class="pat"></div></div><div class="grain"></div>';
+  $('#bg').innerHTML = base;
+  if (!g.steam_appid || !prefs.steamBg) return;
+  const url = `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/library_hero.jpg`, im = new Image();
+  im.onload = () => { if (tok === artTok) $('#bg').innerHTML = `<div class="art" style="background-image:url('${url}')"></div><div class="tint"></div><div class="fade"></div><div class="glow"></div><div class="grain"></div>`; };
+  im.src = url;
+}
+
+const ICON = {
+  home:'<path d="M5 6.5A1.5 1.5 0 0 1 6.5 5h9A1.5 1.5 0 0 1 17 6.5V19H7a2 2 0 0 1-2-2z"/><path d="M17 9h2v8a2 2 0 0 1-2 2"/><path d="M8.5 9h5M8.5 12.5h5M8.5 15.5h3"/>',
+  games:'<rect x="4" y="4" width="7" height="10" rx="1.2"/><rect x="13" y="4" width="7" height="6" rx="1.2"/><rect x="13" y="12" width="7" height="8" rx="1.2"/><rect x="4" y="16" width="7" height="4" rx="1.2"/>',
+  support:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.1.9-1.1 1.7"/><path d="M12 16.8h.01"/>',
+  settings:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>'};
+function renderList(){
+  const n = games.filter(x=>state(x)==='update').length;
+  const items = [['home','Новини',0],['games','Ігри',n],['support','Підтримка',0],['settings','Налаштування',0]];
+  $('#list').innerHTML = items.map(([v,t,bd])=>`<button class="g${v==='support'?' bot':''}" title="${t}" aria-label="${t}" aria-current="${view===v||(v==='games'&&view==='game')}" data-v="${v}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[v]}</svg>${bd?`<b>${bd}</b>`:''}</span><span class="lb">${t}</span></button>`).join('');
+  document.querySelectorAll('.g').forEach(b=>b.onclick=()=>b.dataset.v==='support' ? openSupport() : go(b.dataset.v));
+}
+
+const ACT = {update:'Оновити', install:'Встановити', ready:'Грати', repair:'Відновити', path:'Вказати теку'};
+const steamImg = (g, kind) => g.steam_appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/${kind}.jpg` : '';
+function quick(i){ const keep = sel; sel = i; act(); sel = keep; }
+const CHEV = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+function renderHome(){
+  const gs = games.filter(x => !x.home);
+  const rank = x => ({update:0, repair:1, ready:2, install:3, path:4}[state(x)] ?? 5);
+  const pick = gs.find(x => state(x) === 'update') || gs.find(x => x.id === featuredId) || [...gs].sort((a,b) => rank(a) - rank(b))[0];
+  const subline = (x, st) => st === 'update' ? `Оновлення ${esc(x.cur)} → ${esc(x.version)}, ${esc(x.size)}` : st === 'repair' ? 'Потрібне відновлення українізатора' : st === 'ready' ? `Українізатор ${esc(x.cur)}${x.progress != null ? ', ' + x.progress + '% перекладено' : ''}` : st === 'path' ? 'Гру не знайдено на цьому ПК' : `Український переклад${x.progress != null ? ', ' + x.progress + '%' : ''}`;
+  let hero = '';
+  if (pick) { const i = games.indexOf(pick), st = state(pick), art = steamImg(pick, 'library_hero'), cv = cover(pick);
+    hero = `<div class="sl one" data-i="${i}" tabindex="0" style="--th:${esc(pick.hue)}"><span class="fb">${esc(pick.name[0])}</span>${art ? `<img class="bgimg" src="${esc(art)}" alt="">` : ''}<div class="sc">${cv ? `<img class="sth" src="${esc(cv)}" alt="">` : ''}<h3>${esc(pick.name)}</h3><p>${subline(pick, st)}</p><button class="go pl" data-q="${i}"><span>${ACT[st]}</span></button></div></div>`; }
+  const feed = news.map((n, i) => { const im = safeUrl(n.img), gi = games.findIndex(x => x.id === n.game);
+    return `<article class="nw rv${i ? '' : ' top'}${im ? ' has' : ''}"><div class="d">${esc(n.d)}<b>${esc(n.tag)}</b></div>${im ? `<img class="nimg" src="${esc(im)}" alt="" loading="lazy">` : ''}<h4>${safeUrl(n.u) ? `<a href="${esc(n.u)}">${esc(n.t)}</a>` : esc(n.t)}</h4>${n.x ? `<p>${esc(n.x)}</p>` : ''}${gi > 0 ? `<button class="go2" data-i="${gi}">До гри →</button>` : ''}</article>`; }).join('');
+  $('#stage').innerHTML = `<div class="hm"><div class="hl">
+    <section class="fe"><h2 class="h2">Рекомендовано</h2>${hero}</section>
+    <div class="h2r"><h2 class="h2">Каталог</h2><button class="tl" id="all">Усі ігри</button></div>
+    <div class="prow">${gs.map((x, n) => tileHtml(x, games.indexOf(x), n)).join('')}</div>
+    <h2 class="h2 hn">Новини</h2>
+    ${feed ? `<div class="feed">${feed}</div>` : '<div class="empty"><i></i>Новин поки немає</div>'}
+  </div></div>`;
+  document.querySelectorAll('.sl').forEach(el => { const i = +el.dataset.i; el.onclick = () => go('game', i); el.onkeydown = e => { if (e.key === 'Enter') go('game', i); }; });
+  document.querySelectorAll('[data-q]').forEach(b => b.onclick = e => { e.stopPropagation(); quick(+b.dataset.q); });
+  document.querySelectorAll('.prow .tile').forEach(b => b.onclick = () => go('game', +b.dataset.i));
+  document.querySelectorAll('.bgimg,.sth,.prow .tile img').forEach(im => im.onerror = () => im.remove());
+  document.querySelectorAll('.nimg').forEach(im => im.onerror = () => { im.closest('.nw').classList.remove('has'); im.remove(); });
+  document.querySelectorAll('.go2').forEach(b => b.onclick = () => go('game', +b.dataset.i));
+  $('#all').onclick = () => go('games');
+}
+
+const cover = g => safeUrl(g.cover) || (g.steam_appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/library_600x900.jpg` : '');
+const FLT = [['all','Усі'],['installed','Встановлені'],['update','Є оновлення'],['missing','Не знайдено']];
+function renderGames(){
+  $('#stage').innerHTML = `<h2 class="h2">Каталог</h2><p class="note" style="margin-top:6px">${games.length-1} ігор, ${games.filter(x=>x.cur).length} встановлено${games.filter(x=>state(x)==='update').length?`, ${games.filter(x=>state(x)==='update').length} з оновленнями`:''}</p>
+    <div class="tools"><div class="chips">${FLT.map(([k,t])=>`<button class="chip" aria-pressed="${flt===k}" data-f="${k}">${t}</button>`).join('')}</div><a class="tl" href="${esc(SUPPORT.issues)}" target="_blank" rel="noopener">Запропонувати гру</a></div>
+    <div class="grid" id="grid"></div>`;
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ flt = b.dataset.f; renderGames(); });
+  fillGrid();
+}
+function tileHtml(g, i, n){
+  const c = cover(g), st = state(g);
+  const sub = st === 'update' ? 'Є оновлення' : st === 'repair' ? 'Потрібне відновлення' : st === 'path' ? 'Не знайдено на ПК' : st === 'ready' ? 'Встановлено ' + esc(g.cur) : (g.progress != null ? g.progress + '% перекладено' : 'Не встановлено');
+  return `<button class="tile ${g.cur ? 'on' : 'off'}" data-i="${i}" aria-label="${esc(g.name)}" style="--th:${esc(g.hue)};--i:${n}"><span class="fb">${esc(g.name[0])}</span>${c ? `<span class="pic"><img src="${esc(c)}" alt="" loading="lazy"></span>` : ''}${st === 'update' ? '<i class="bdg">Оновлення</i>' : ''}<span class="nm">${esc(g.name)}<small>${sub}</small></span></button>`;
+}
+function fillGrid(){
+  const qq = q.trim().toLowerCase();
+  const list = games.map((g,i) => [g,i]).filter(([g]) => !g.home && g.name.toLowerCase().includes(qq) && ({all:true, installed:!!g.cur, update:state(g)==='update', missing:!g.path}[flt]));
+  $('#grid').innerHTML = list.length ? list.map(([g,i],n) => tileHtml(g,i,n)).join('') : '<div class="empty"><i></i>Нічого не знайдено</div>';
+  document.querySelectorAll('#grid .tile img').forEach(im => im.onerror = () => im.remove());
+  document.querySelectorAll('#grid .tile').forEach(b => b.onclick = () => go('game', +b.dataset.i));
+}
+
+let tab = 'look';
+const TABS = [['look','Вигляд'],['behavior','Поведінка'],['paths','Шляхи до ігор'],['catalog','Каталог'],['data','Дані'],['about','Про Ліхтар']];
+const HUES = [25,75,140,178,255,300,350];
+const fmt = b => b < 1024 ? b+' Б' : b < 1048576 ? Math.round(b/1024)+' КБ' : (b/1048576).toFixed(1).replace('.',',')+' МБ';
+const sw = k => `<button class="sw" role="switch" aria-checked="${!!prefs[k]}" data-sw="${k}"></button>`;
+const seg = (k,items) => `<div class="seg">${items.map(([v,t])=>`<button aria-pressed="${prefs[k]===v}" data-seg="${k}" data-v="${v}">${t}</button>`).join('')}</div>`;
+const row = (t,d,c='') => `<div class="sr"><div class="rt"><b>${t}</b>${d?`<span>${d}</span>`:''}</div><div class="rc">${c}</div></div>`;
+function panel(){
+  const custom = prefs.accent !== 'game';
+  if (tab==='look') return row('Тема','', seg('mode',[['auto','Авто'],['light','Світла'],['dark','Темна']]))
+    + `<div class="sr col"><div style="display:flex;justify-content:space-between;align-items:center;gap:28px"><div class="rt"><b>Колір акценту</b><span>У кожної гри свій колір, або один для всіх</span></div>
+       <div class="seg"><button id="ag" aria-pressed="${!custom}">Від гри</button><button id="ac" aria-pressed="${custom}">Свій</button></div></div>
+       ${custom?`<div class="dots">${HUES.map(h=>`<button class="dot" data-h="${h}" style="--dh:${h}" aria-label="Відтінок ${h}" aria-pressed="${prefs.accent===h}"></button>`).join('')}</div><input type="range" id="hue" min="0" max="360" value="${prefs.accent}" aria-label="Відтінок">`:''}</div>`
+    + row('Картинка гри на фоні','Беремо зі Steam', sw('steamBg'))
+    + row('Вимкнути анімації','', sw('calm'));
+  if (tab==='behavior') return row('Закривати Ліхтар після запуску гри','', sw('closeOnPlay'))
+    + row('Оновлювати каталог при запуску','Інакше буде те, що збережено востаннє', sw('autoCatalog'))
+    + row('Питати перед відкатом','Щоб випадково не стерти переклад', sw('confirmRollback'));
+  if (tab==='paths') return `<p class="note" style="padding:14px 0;font-size:13px">Тут видно, де лежить кожна гра. Якщо Ліхтар не знайшов, вкажіть теку самі.</p>`
+    + games.slice(1).map(g=>row(esc(g.name), `<span class="pth">${g.path?esc(g.path):'Не знайдено'}</span>`,
+        `<button class="tl" data-a="${g.path?'op':'rt'}" data-id="${esc(g.id)}">${g.path?'Відкрити':'Знайти'}</button><button class="tl" data-a="ch" data-id="${esc(g.id)}">Змінити</button>`)).join('');
+  if (tab==='catalog') return row('Джерело', esc(catSource), `<span>${games.length-1} ігор</span>`)
+    + `<div class="sr col"><div class="rt"><b>Адреса каталогу</b><span>Якщо порожньо, береться стандартний</span></div><input class="txt" id="curl" spellcheck="false" placeholder="https://raw.githubusercontent.com/…/catalog.json" value="${esc(prefs.catalogUrl)}"></div>`
+    + row('Оновити каталог зараз','', '<button class="tl" id="rl">Оновити</button>');
+  if (tab==='data') return row('Тека даних','<span class="pth" id="d-dir">…</span>','<button class="tl" id="d-open">Відкрити</button>')
+    + row('Резервні копії','Оригінальні файли, щоб можна було відкотитись', '<span id="d-bk">…</span>')
+    + row('Кеш завантажень','Те, що не докачалось', '<span id="d-ch">…</span><button class="tl" id="d-clr">Очистити</button>')
+    + row('Журнал','', '<button class="tl" id="l-copy">Скопіювати</button><button class="tl" id="l-open">Відкрити</button>')
+    + row('Надсилати статистику встановлень', STATS_URL ? 'Лише назва гри, версія та чи вдалося. Нічого особистого' : 'Поки вимкнено: немає адреси для збору', sw('stats'));
+  return row('Версія','0.1.0, © 2026 Ліхтар', '<button class="tl" id="a-upd">Перевірити оновлення</button>') + row('Перевіряти оновлення Ліхтаря при запуску','', sw('autoUpdate'))
+    + row('Діагностика','', '<button class="tl" id="a-copy">Скопіювати</button><button class="tl" id="a-sup">Підтримка</button>')
+    + row('Скинути налаштування','', '<button class="tl" id="a-rs">Скинути</button>');
+}
+function renderSettings(){
+  $('#stage').innerHTML = `<h1 class="st-h">Налаштування</h1><div class="st"><div class="st-nav">${TABS.map(([k,t])=>`<button data-tab="${k}" aria-current="${tab===k}">${t}</button>`).join('')}</div><div class="st-body"><h2>${TABS.find(t=>t[0]===tab)[1]}</h2>${panel()}</div></div>`;
+  const on = (sel, fn) => document.querySelectorAll(sel).forEach(b=>b.onclick=()=>fn(b));
+  const gm = id => games.find(g=>g.id===id);
+  on('[data-tab]', b=>{ tab = b.dataset.tab; renderSettings(); });
+  on('[data-sw]', b=>{ prefs[b.dataset.sw] = !prefs[b.dataset.sw]; savePrefs(); applyTheme(); render(); });
+  on('[data-seg]', b=>{ prefs[b.dataset.seg] = b.dataset.v; savePrefs(); applyTheme(); render(); });
+  on('#ag', ()=>{ prefs.accent = 'game'; savePrefs(); render(); });
+  on('#ac', ()=>{ if (prefs.accent === 'game') prefs.accent = 200; savePrefs(); render(); });
+  on('[data-h]', b=>{ prefs.accent = +b.dataset.h; savePrefs(); render(); });
+  const h = $('#hue'); if (h) { h.oninput = () => { prefs.accent = +h.value; document.documentElement.style.setProperty('--h', prefs.accent); }; h.onchange = () => { savePrefs(); render(); }; }
+  on('[data-a]', b=>{ const g = gm(b.dataset.id), a = b.dataset.a;
+    if (a==='op') call('open_folder',{path:g.path}).catch(e=>setStatus(String(e))); else if (a==='rt') redetect(g); else pickDir(g); });
+  const cu = $('#curl'); if (cu) cu.onchange = () => { prefs.catalogUrl = cu.value.trim(); savePrefs(); setStatus('Адресу збережено. Натисніть «Оновити»'); };
+  on('#rl', async ()=>{ if (busy) return; setStatus('Оновлюю каталог…'); await load(true); render(); setStatus(`Каталог оновлено. Джерело: ${catSource}`); });
+  if (tab==='data') {
+    const refresh = () => call('storage_info').then(i=>{ $('#d-dir').textContent = i.dir; logPath = i.log; $('#d-bk').textContent = fmt(i.backups); $('#d-ch').textContent = fmt(i.cache); $('#d-clr').disabled = !i.cache;
+      $('#d-open').onclick = () => call('open_folder',{path:i.dir}).catch(e=>setStatus(String(e))); }).catch(e=>setStatus(String(e)));
+    $('#d-clr').onclick = () => { if (busy) return setStatus('Зачекайте завершення встановлення'); call('clear_cache').then(n=>{ setStatus(`Звільнено ${fmt(n)}`); refresh(); }).catch(e=>setStatus(String(e))); };
+    refresh();
+    $('#l-copy').onclick = async () => { try { await navigator.clipboard.writeText(await call('read_log')); setStatus('Журнал скопійовано'); } catch(e) { setStatus('Не вдалося: '+e); } };
+    $('#l-open').onclick = () => logPath ? call('open_folder',{path:logPath}).catch(e=>setStatus(String(e))) : 0;
+  }
+  on('#a-upd', () => checkSelf(true));
+  on('#a-copy', async ()=>{ try { await navigator.clipboard.writeText(diag()); setStatus('Діагностику скопійовано'); } catch { setStatus('Не вдалося скопіювати'); } });
+  on('#a-sup', ()=>$('#sup').click());
+  on('#a-rs', ()=>{ Object.assign(prefs, DEF); savePrefs(); applyTheme(); render(); setStatus('Налаштування скинуто'); });
+}
+
+let lastKey = '';
+function render(){
+  const key = view + ':' + (view === 'game' ? sel : ''), enter = key !== lastKey; lastKey = key;
+  const g = games[sel], gv = view === 'game' && g && !g.home;
+  document.documentElement.style.setProperty('--h', hueOf(gv ? g : {hue:75}));
+  drawBg(gv ? g : {name: view === 'home' ? 'Л' : ''});
+  renderList();
+  if (view === 'home') renderHome(); else if (view === 'games') renderGames(); else if (view === 'settings') renderSettings(); else renderGame(g);
+  afterRender(enter);
+}
+function afterRender(enter){
+  updateTop();
+  const st = $('#stage'); st.classList.toggle('enter', enter); if (enter) st.scrollTop = 0;
+  [...[...st.children].filter(c=>!c.classList.contains('gp') && !c.classList.contains('hm')), ...st.querySelectorAll('.gm>*,.gd>*,.hl>*,.hs>*')].forEach((c,i)=>c.style.setProperty('--k', i));
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const to = +el.dataset.count; if (prefs.calm || !to) { el.textContent = to; return; }
+    const t0 = performance.now(); (function f(t){ const p = Math.min(1,(t-t0)/900); el.textContent = Math.round(to*(1-Math.pow(1-p,3))); if (p < 1) requestAnimationFrame(f); })(t0);
+  });
+  const rv = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window) { const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add('vis'); io.unobserve(x.target); } }), {root:st, threshold:.12}); rv.forEach(el=>io.observe(el)); }
+  else rv.forEach(el=>el.classList.add('vis'));
+  const a = document.querySelector('.g[aria-current=true]'), ri = $('#ri');
+  if (a && ri) { ri.style.transform = `translateY(${a.getBoundingClientRect().top - $('#rail').getBoundingClientRect().top}px)`; ri.style.height = a.offsetHeight + 'px'; }
+}
+
+const STATUS = {complete:'Повний переклад', partial:'Частковий переклад', wip:'У роботі'};
+let allLog = false;
+function gbody(g){
+  const c = g.compare, cmp = c && okImg(c.before) && okImg(c.after)
+    ? `<section class="gs"><h3>Як виглядає в грі</h3><figure class="ba"><img src="${esc(c.after)}" alt="Українська"><img class="b" src="${esc(c.before)}" alt="Оригінал"><span class="tg" style="left:10px">Оригінал</span><span class="tg" style="right:10px">Українська</span><input type="range" min="0" max="100" value="50" aria-label="Порівняння: оригінал і українська"></figure><p class="note">${c.caption ? esc(c.caption) + '. ' : ''}Потягніть, щоб порівняти</p></section>` : '';
+  const all = g.log || [], list = allLog ? all : all.slice(0, 3);
+  const hist = all.length ? `<section class="gs"><h3>Історія змін</h3>${list.map(e => `<div class="e"><div class="d">${esc(e.d)}</div><ul>${e.i.map(([k,t]) => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}${all.length > 3 ? `<button class="lnk" id="allog">${allLog ? 'Показати менше' : `Усі зміни (${all.length})`}</button>` : ''}</section>` : '';
+  return cmp + hist;
+}
+function aside(g){
+  const c = cover(g);
+  const f = [['Студія', g.studio], ['Версія патча', g.version], ['Розмір', g.size], g.progress != null ? ['Переклад', g.progress >= 100 ? 'Повний' : g.progress + '%'] : null, g.font_ok === false ? ['Шрифт', 'Потрібен окремий шрифт'] : null, g.path ? ['Шлях', g.path] : null].filter(Boolean);
+  return `<aside class="gd"><div class="cv" style="--th:${esc(g.hue)}"><span class="fb">${esc(g.name[0])}</span>${c?`<img src="${esc(c)}" alt="">`:''}</div>
+    <dl class="facts">${f.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>${g.issues?.length ? `<div class="known"><b>Відомі проблеми</b><ul>${g.issues.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}</aside>`;
+}
+function renderGame(g){
+  const s = state(g), mine = job && job.id === g.id, queued = queue.includes(g.id);
+  const warn = g.game_build && g.build && g.game_build !== g.build ? `<span class="note warn">Патч перевірено для збірки ${esc(g.game_build)}, у вас ${esc(g.build)}</span>` : '';
+  const ver = mine ? `<span class="note">${esc(job.txt)}</span>`
+    : s==='update' ? `<span class="ver"><s>${esc(g.cur)}</s><em>${esc(g.version)}</em></span>${warn}`
+    : s==='ready' || s==='repair' ? `<span class="ver"><em>${esc(g.cur)}</em></span><span class="note">${s==='repair'?'Потрібне відновлення':'Актуальна версія'}</span>${warn}`
+    : s==='install' ? `<span class="ver"><em>${esc(g.version)}</em></span>${warn}`
+    : `<span class="warnline">Гру не знайдено. Вкажіть теку вручну.</span>`;
+  const msg = g.err ? g.err : g.issue && !mine ? (g.issue.kind === 'build'
+      ? `Гра оновилась (збірка ${g.issue.from} → ${g.issue.to}), файли українізатора могли зникнути. Натисніть «Відновити».`
+      : `Файли українізатора змінено або видалено (${g.issue.n}). Натисніть «Відновити».`) : '';
+  const sub = [];
+  if (mine || queued) sub.push('<button id="cx">Скасувати</button>');
+  else {
+    if (g.cur) sub.push(`<button id="rb" class="${armed?'warn':''}">${armed?'Відкотити до оригіналу?':'Відкат до оригіналу'}</button>`);
+    if (g.path) sub.push('<button id="op">Тека гри</button>','<button id="ch">Змінити теку</button>'); else sub.push('<button id="rt">Знайти знову</button>');
+  }
+  sub.push('<button id="lk">Копіювати посилання</button>','<button id="rp">Повідомити про помилку</button>');
+  const dlc = !mine && (s==='install' || s==='update') && g.size ? `<p class="dlc">Завантаження: ${esc(g.size)}</p>` : '';
+  $('#stage').innerHTML = `<div class="gp"><div class="gm">
+    <button class="back" id="bk">← Ігри</button>
+    <div class="studio">${esc(g.studio)}</div>
+    <h1 class="title ${mine?'':'idle'}" id="t" style="--p:${mine?job.pct:100}">${esc(g.name)}</h1>
+    <div class="meta" id="meta">${ver}</div>
+    <div class="act"><button class="go" id="go" ${mine||queued?'disabled':''} style="--f:${mine?job.pct/100:0}"><i class="fill"></i><span>${mine?Math.round(job.pct)+'%':queued?'У черзі':label[s]}</span></button></div>
+    ${dlc}${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
+    <div class="sub">${sub.join('')}</div>
+    ${gbody(g)}</div>${aside(g)}</div>`;
+  document.querySelectorAll('.cv img').forEach(im=>im.onerror=()=>im.remove());
+  $('#go').onclick = act;
+  $('#bk').onclick = () => go('games');
+  $('#rp').onclick = () => $('#sup').click();
+  $('#lk').onclick = async () => { try { await navigator.clipboard.writeText(`lichtar://game/${g.id}`); setStatus('Посилання скопійовано'); } catch { setStatus('Не вдалося скопіювати'); } };
+  $('#cx')?.addEventListener('click', () => { if (mine) call('cancel_install',{id:g.id}); else { queue = queue.filter(x=>x!==g.id); dock(); render(); } });
+  document.querySelectorAll('.ba input').forEach(i=>i.oninput=()=>i.parentElement.style.setProperty('--x', i.value+'%'));
+  $('#allog')?.addEventListener('click', () => { allLog = !allLog; render(); });
+  $('#rb')?.addEventListener('click', rollback);
+  $('#op')?.addEventListener('click', () => call('open_folder',{path:g.path}).catch(e=>setStatus(String(e))));
+  $('#ch')?.addEventListener('click', () => pickDir(g));
+  $('#rt')?.addEventListener('click', () => redetect(g));
+}
+
+/* стан файлів гри: збірка Steam і цілісність файлів українізатора */
+async function health(g){
+  g.issue = null; g.build = null;
+  if (!g.path) return;
+  if (g.steam_appid && /steamapps/i.test(g.path)) g.build = await call('game_build',{appid:g.steam_appid}).catch(()=>null);
+  if (!g.cur) return;
+  const rep = await call('verify_install',{id:g.id,gameDir:g.path}).catch(()=>null);
+  const n = rep ? rep.missing.length + rep.changed.length : 0;
+  if (n) g.issue = {kind:'files', n};
+  else if (g.curBuild && g.build && g.curBuild !== g.build) g.issue = {kind:'build', from:g.curBuild, to:g.build};
+}
+
+async function detect(g){ return call('detect_game',{appid:g.steam_appid ?? null,gogId:g.gog_id ?? null,exes:g.exe||[],folders:g.folders||[g.name]}); }
+async function redetect(g){
+  setStatus('Шукаю…');
+  try { const p = await detect(g); if (p) { g.path = p; await call('set_path',{id:g.id,path:p}); await health(g); render(); setStatus(`Знайдено: ${p}`); } else setStatus('Не знайдено. Вкажіть теку вручну'); }
+  catch(e){ setStatus(String(e)); }
+}
+async function pickDir(g){
+  try {
+    const p = await call('pick_folder'); if (!p) return;
+    if (!await call('validate_game_dir',{dir:p,exes:g.exe||[]})) { setStatus(`У цій теці немає ${(g.exe||[])[0] || 'гри'}`); return; }
+    g.path = p; await call('set_path',{id:g.id,path:p}); await health(g); render(); setStatus(`Теку збережено: ${p}`);
+  } catch(e){ setStatus(String(e)); }
+}
+
+const log = m => call('log_event',{msg:m}).catch(()=>{});
+const stat = (g, ok) => { if (prefs.stats && STATS_URL) call('post_json',{url:STATS_URL,body:JSON.stringify({game:g.id,version:g.version,ok,launcher:'0.1.0'})}).catch(()=>{}); };
+function errText(m){
+  m = String(m);
+  if (m === 'CANCELLED') return 'Скасовано. Завантажене збережено, можна продовжити.';
+  if (m.startsWith('LOCKED:')) return `Файл «${m.slice(7)}» зайнятий. Закрийте гру й повторіть.`;
+  if (m.startsWith('NOSPACE:')) { const [n,f] = m.slice(8).split(':').map(Number); return `Мало місця на диску: потрібно ${fmt(n)}, вільно ${fmt(f)}.`; }
+  return 'Помилка: ' + m;
+}
+async function install(g){
+  if (!g.url) { setStatus(`${g.name}: патча ще немає в каталозі`); return; }
+  if (busy) { if (busy !== g.id && !queue.includes(g.id)) { queue.push(g.id); setStatus(`${g.name}: додано в чергу`); dock(); render(); } return; }
+  busy = g.id; job = {id:g.id,pct:0,txt:'Підключаюся'}; armed = false; g.err = null; render(); dock();
+  try {
+    await call('install_patch',{id:g.id,version:g.version,url:g.url,sha256:g.sha256,gameDir:g.path,appid:g.steam_appid ?? null});
+    const v = (await call('installed_versions'))[g.id]; g.cur = v?.version || g.version; g.curBuild = v?.build || null; await health(g);
+    setStatus(`${g.name} ${g.version} встановлено. Можна грати`); log(`встановлено ${g.id} ${g.version}`); stat(g, true);
+  } catch(err){
+    g.err = errText(err); setStatus(g.err); log(`помилка ${g.id}: ${err}`);
+    if (String(err) !== 'CANCELLED') stat(g, false);
+  }
+  busy = null; job = null; dock(); render();
+  const nx = queue.shift(), x = nx && games.find(y=>y.id===nx); if (x) install(x);
+}
+async function act(){
+  const g = games[sel], s = state(g);
+  if (job?.id === g.id || queue.includes(g.id)) return;
+  if (s==='path') return pickDir(g);
+  if (s==='ready') return call('play_game',{appid:g.steam_appid ?? null,gameDir:g.path,exe:(g.exe||[])[0] ?? null}).then(()=>{ setStatus(`Запускаю ${g.name}`); if (prefs.closeOnPlay) setTimeout(()=>win?.close(), 1500); }).catch(e=>setStatus('Не вдалося запустити: '+e));
+  install(g);
+}
+function updateAll(){ for (const x of games.filter(x=>state(x)==='update')) install(x); }
+async function rollback(){
+  if (!armed && prefs.confirmRollback){ armed = true; render(); return; }
+  const g = games[sel]; armed = false;
+  try { await call('rollback',{id:g.id,gameDir:g.path}); g.cur = null; g.issue = null; render(); setStatus(`Оригінальні файли ${g.name} повернуто`); }
+  catch(e){ render(); setStatus('Помилка відкату: '+e); }
+}
+
+/* ---- випадаючий список ---- */
+function mkDD(el, items, value, onChange){
+  let cur = value, act = -1;
+  el.innerHTML = '<button type="button" class="dd-b" aria-haspopup="listbox" aria-expanded="false"><span class="dd-v"></span><svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 6 6.5 11 1.5"/></svg></button><ul class="dd-l" role="listbox" hidden></ul>';
+  const b = el.querySelector('.dd-b'), l = el.querySelector('.dd-l'), v = el.querySelector('.dd-v');
+  const paint = () => { v.textContent = (items.find(i => i[0] === cur) || items[0])[1];
+    l.innerHTML = items.map(([k,t],i) => `<li role="option" data-i="${i}" aria-selected="${k === cur}" class="${i === act ? 'act' : ''}">${esc(t)}</li>`).join(''); };
+  const out = e => { if (!el.contains(e.target)) close(); };
+  const close = () => { l.hidden = true; b.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', out, true); };
+  const open = () => { act = Math.max(0, items.findIndex(i => i[0] === cur)); paint(); l.hidden = false; b.setAttribute('aria-expanded', 'true'); document.addEventListener('pointerdown', out, true); };
+  const pick = i => { cur = items[i][0]; paint(); close(); onChange(cur); };
+  b.onclick = () => l.hidden ? open() : close();
+  l.onclick = e => { const li = e.target.closest('li'); if (li) pick(+li.dataset.i); };
+  b.onkeydown = e => {
+    if (l.hidden) { if (['ArrowDown','ArrowUp','Enter',' '].includes(e.key)) { e.preventDefault(); open(); } return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); act = Math.min(items.length - 1, act + 1); paint(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); act = Math.max(0, act - 1); paint(); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(act); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+  };
+  paint();
+}
+
+/* ---- звернення в підтримку ---- */
+const TYPES = ['Помилка в перекладі', 'Не встановлюється', 'Не запускається', 'Інше'];
+let mdType = TYPES[0], mdGid = '';
+const diagFor = g => `Ліхтар 0.1.0\nГра: ${g ? g.name : '—'}${g ? `\nВстановлено: ${g.cur || 'ні'}, у каталозі: ${g.version || '—'}\nШлях: ${g.path || 'не вказано'}` : ''}\nСистема: ${navigator.userAgent}`;
+const diag = () => diagFor(view === 'game' ? games[sel] : null);
+const mdGame = () => games.find(x => x.id === mdGid);
+function mdMsg(t, ok){ const m = $('#md-e'); m.textContent = t; m.className = 'md-e' + (ok ? ' ok' : ''); }
+function mdVisual(){
+  const g = mdGame(), v = $('#md-v');
+  v.style.setProperty('--th', g ? g.hue : '');
+  v.classList.remove('has'); v.querySelector('img')?.remove();
+  const c = g && cover(g);
+  if (c) { const im = new Image(); im.alt = ''; im.onload = () => v.classList.add('has'); im.onerror = () => im.remove(); im.src = c; v.prepend(im); }
+}
+function openSupport(){
+  const cur = view === 'game' ? games[sel] : null; mdGid = cur ? cur.id : '';
+  mkDD($('#dd-t'), TYPES.map(t => [t, t]), mdType, v => { mdType = v; });
+  mkDD($('#dd-g'), [['', 'Не стосується гри'], ...games.filter(x => !x.home).map(x => [x.id, x.name])], mdGid, v => { mdGid = v; mdVisual(); });
+  mdMsg(''); mdVisual(); $('#dlg').showModal(); $('#md-d').focus();
+}
+async function mdSend(via){
+  const d = $('#md-d').value.trim(), g = mdGame();
+  if (!d) { mdMsg('Опишіть, що сталося'); $('#md-d').focus(); return; }
+  const subject = mdType + (g ? ': ' + g.name : ''), body = d + ($('#md-c').checked ? '\n\n---\n' + diagFor(g) : '');
+  const url = via === 'mail' ? `mailto:${SUPPORT.email}?subject=${encodeURIComponent('Ліхтар. ' + subject)}&body=${encodeURIComponent(body)}` : `${SUPPORT.issues}/new?title=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  try { await call('open_url', {url}); } catch { window.open(url, '_blank'); }
+  $('#dlg').close(); $('#md-d').value = '';
+  notify(via === 'mail' ? 'Лист підготовлено у вашій поштовій програмі' : 'Сторінку звернення відкрито в браузері', 'ok');
+}
+$('#sup').onclick = openSupport;
+$('#md-mail').onclick = () => mdSend('mail'); $('#md-gh').onclick = () => mdSend('gh');
+$('#dclose').onclick = () => $('#dlg').close();
+$('#dlg').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+$('#dlog').onclick = async () => { try { await navigator.clipboard.writeText(await call('read_log')); mdMsg('Журнал скопійовано. Вставте його в лист', true); } catch { mdMsg('Не вдалося скопіювати журнал'); } };
+
+/* ---- lichtar://game/<id>, клавіатура, фокус ---- */
+function openLink(u){
+  try {
+    const x = new URL(u); if (x.protocol !== 'lichtar:') return;
+    const [a, b] = (x.hostname + x.pathname).split('/').filter(Boolean);
+    if (a === 'game') { const i = games.findIndex(g=>g.id===b); if (i > 0) go('game', i); }
+    else if (a === 'games') go('games'); else if (a === 'news') go('home');
+  } catch {}
+}
+T?.event?.listen('deep-link', e => openLink(e.payload));
+addEventListener('keydown', e => {
+  if (e.target.matches?.('input,textarea') || $('#dlg').open || $('#splash')) return;
+  if (e.ctrlKey && e.key === '1') go('home'); else if (e.ctrlKey && e.key === '2') go('games'); else if (e.ctrlKey && e.key === '3') go('settings');
+  else if (e.key === '/') { e.preventDefault(); $('#gs').focus(); }
+  else if (e.key === 'Escape' && view === 'game') go('games');
+});
+addEventListener('focus', () => { const g = games[sel]; if (!busy && view === 'game' && g && !g.home) health(g).then(render); });
+
+/* ---- самооновлення лончера (tauri-plugin-updater) ---- */
+async function checkSelf(manual){
+  if (!T?.updater) { if (manual) setStatus('Самооновлення в цій збірці вимкнене'); return; }
+  try { selfUpd = await T.updater.check() || null; dock(); if (manual) setStatus(selfUpd ? `Доступний Ліхтар ${selfUpd.version}` : 'У вас остання версія'); }
+  catch(e) { log('updater: ' + e); if (manual) setStatus('Не вдалося перевірити оновлення: ' + e); }
+}
+async function applySelf(){
+  if (!selfUpd) return;
+  if (busy) { setStatus('Дочекайтеся завершення встановлення патча'); return; }
+  setStatus('Завантажую оновлення Ліхтаря…');
+  try { await selfUpd.downloadAndInstall(); await T.process.relaunch(); }
+  catch(e) { log('updater: ' + e); setStatus('Помилка оновлення: ' + e); }
+}
+/* зовнішні посилання відкриваємо в браузері */
+document.addEventListener('click', e => { const a = e.target.closest?.('a[href^="http"]'); if (!a) return; e.preventDefault(); call('open_url',{url:a.href}).catch(() => window.open(a.href, '_blank', 'noopener')); });
+/* ---- пошук у шапці та кнопка оновлень ---- */
+const gsEl = $('#gs');
+gsEl.addEventListener('input', () => { q = gsEl.value; if (view !== 'games') { view = 'games'; render(); } else fillGrid(); });
+gsEl.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { gsEl.value = ''; q = ''; gsEl.blur(); if (view === 'games') fillGrid(); }
+  else if (e.key === 'Enter') { const t = document.querySelector('#grid .tile'); if (t) t.click(); }
+});
+$('#updbtn').onclick = updateAll;
+function updateTop(){ const n = games.filter(x => state(x) === 'update').length, b = $('#updbtn'); if (b) { b.hidden = !n; b.textContent = `Оновити все (${n})`; } }
+function initCarousel(){
+  const cr = $('.cr'); if (!cr) return;
+  const sl = [...cr.children], prev = $('.cn.prev'), next = $('.cn.next'); let raf = 0;
+  const mark = () => { raf = 0; let b = 0, bd = 1e9;
+    sl.forEach((s, i) => { const d = Math.abs(s.offsetLeft - cr.scrollLeft); if (d < bd) { bd = d; b = i; } });
+    sl.forEach((s, i) => s.classList.toggle('on', i === b));
+    prev.style.visibility = cr.scrollLeft > 4 ? 'visible' : 'hidden';
+    next.style.visibility = cr.scrollLeft + cr.clientWidth < cr.scrollWidth - 4 ? 'visible' : 'hidden'; };
+  const step = d => cr.scrollBy({left: d * (sl[0].offsetWidth + 18), behavior: 'smooth'});
+  cr.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(mark); });
+  prev.onclick = () => step(-1); next.onclick = () => step(1);
+  mark();
+}
+applyTheme();
+splash();
+</script>
+</body>
+</html>
