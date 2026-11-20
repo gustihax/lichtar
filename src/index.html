@@ -724,6 +724,8 @@ dialog.wn::backdrop{background:oklch(0 0 0/.62);backdrop-filter:blur(3px)}
 </dialog>
 <script>
 const T = window.__TAURI__, DEMO = !T?.core;
+/* Чи вже запускали Ліхтар раніше (до того, як щось запишемо): відрізняє оновлення зі старої версії від чистого встановлення */
+const HAD_DATA = (() => { try { return Object.keys(localStorage).some(k => k.startsWith('lichtar.') && k !== 'lichtar.demoVer'); } catch { return false; } })();
 const SUPPORT = {email:'hopethatislight@gmail.com', issues:'https://github.com/gustihax/lichtar/issues'};
 /* Віддалений каталог (GitHub raw). Порожньо = беремо вбудований BUNDLED нижче. */
 const CATALOG_URL = 'https://raw.githubusercontent.com/gustihax/lichtar-catalog/main/catalog.json';
@@ -1551,8 +1553,8 @@ function showWhatsNew(ver, body){
 async function checkWhatsNew(){
   let ver; try { ver = DEMO ? (lsGet('lichtar.demoVer') || '0.1.1') : await T.app.getVersion(); } catch { return; }
   const last = lsGet(VER_KEY);
-  if (!last) { lsSet(VER_KEY, ver); return; }
   if (last === ver) return;
+  if (!last && !HAD_DATA) { lsSet(VER_KEY, ver); return; }
   let body = ''; try { const n = JSON.parse(lsGet(NOTES_KEY)); if (n && n.v === ver) body = n.body || ''; } catch {}
   if (!body) { try { body = JSON.parse(await getText(`https://api.github.com/repos/${APP_REPO}/releases/tags/v${ver}`)).body || ''; } catch {} }
   lsSet(VER_KEY, ver); lsSet(NOTES_KEY, null);
