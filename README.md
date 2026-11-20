@@ -1,7 +1,26 @@
-# Tauri + Vanilla
+# 🕯️ Каталог українізаторів для утиліти «Ліхтар»
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
+Офіційний каталог локалізацій від спілки **«Тлумачі Світла»**. Містить актуальні конфігурації, посилання на релізи, хеші безпеки та історії змін для ігор, які підтримуються лончером.
 
-## Recommended IDE Setup
+## 🎮 Підтримувані ігри
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- **Blood West**
+- **Death's Door**
+- **Windbound**
+- **ITORAH**
+- **Turbo Kid**
+- **Lost Ruins**
+
+---
+
+## 🛠️ Для розробників та мейнтейнерів
+
+Каталог автоматично синхронізується з лончером через `catalog.json`.
+
+### Публікація оновлення патчу:
+1. Створіть реліз у форматі `id-гри-vX.Y` (наприклад, `blood-west-v1.0`).
+2. Прикріпіть `.zip` архів із файлами локалізації.
+3. Додайте оновлений запис у `catalog.json` та випустіть комміт у `main`.
+
+---
+*Створено з любов'ю до української локалізації.*
