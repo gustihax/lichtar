@@ -116,50 +116,6 @@ Steam, GOG та Epic Games. Якщо гра стоїть деінде, теку 
 
 **Перекладачам:** як додати свою гру чи випустити оновлення патча, описано в [інструкції для мейнтейнерів](https://github.com/gustihax/lichtar-catalog/blob/main/docs/maintainers.md).
 
-## Розробка
-
-Ліхтар зроблено на [Tauri 2](https://tauri.app): інтерфейс в одному файлі HTML, усе, що працює з диском і мережею, написано на Rust.
-
-**Потрібно:** Node.js 20+, Rust (stable), WebView2 (у Windows 10/11 уже є).
-
-```powershell
-npm install
-npm run tauri dev     # запуск з гарячим перезавантаженням інтерфейсу
-npm run tauri build   # інсталятор у src-tauri/target/release/bundle/nsis
-```
-
-| Де | Що |
-|---|---|
-| `src/index.html` | увесь інтерфейс: розмітка, стилі, логіка |
-| `src-tauri/src/lib.rs` | пошук ігор, встановлення, резервні копії, завантаження |
-| `src-tauri/tauri.conf.json` | версія, вікно, налаштування самооновлення |
-| `.github/workflows/release.yml` | збірка й підпис релізу |
-| `docs/` | сайт [gustihax.github.io/lichtar](https://gustihax.github.io/lichtar/) |
-
-<details>
-<summary><b>Як випустити нову версію</b></summary>
-
-<br>
-
-1. Підніміть версію в `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` і `package.json`.
-2. Зробіть коміт і пуш у `main`.
-3. Поставте тег з тією ж версією: `git tag v0.1.3` і `git push origin v0.1.3`.
-4. GitHub Actions збере й підпише інсталятор та `latest.json` для самооновлення.
-5. Відредагуйте опис релізу. Ліхтар покаже його користувачам у вікні «Що нового», тож пишіть так:
-
-```markdown
-## Нове
-- ...
-
-## Покращено
-- ...
-
-## Виправлено
-- ...
-```
-
-</details>
-
 ## Ліцензія
 
 [MIT](LICENSE). Програма безкоштовна й такою залишиться. Переклади належать їхнім авторам.
