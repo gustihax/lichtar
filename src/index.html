@@ -204,6 +204,20 @@ html[data-calm] *{transition:none!important;animation:none!important}
 .gbody{max-width:700px}
 .prog{width:160px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ac)}
 .issues{margin:8px 0 0;padding-left:18px;color:var(--dim);font-size:13px}
+/* сповіщення: смуга під шапкою на всю ширину вмісту, колір залежить від виду */
+#toasts{position:fixed;top:68px;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+.tst{pointer-events:auto;position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;width:fit-content;min-width:300px;max-width:min(600px,100%);min-height:40px;padding:9px 8px 9px 14px;background:var(--bg2);color:var(--tx);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px -12px oklch(0 0 0/.75);font:600 13.5px/1.4 var(--body);animation:tdown .28s cubic-bezier(.2,.7,.2,1);transition:opacity .25s,transform .25s}
+.tst.ok{background:var(--ac);color:var(--onac);border-color:transparent}
+.tst.err{background:oklch(.56 .19 27);color:#fff;border-color:transparent}
+.tst svg{flex:none;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tst span{flex:1;min-width:0}
+.tst button{flex:none;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;color:inherit;opacity:.7}.tst button:hover{opacity:1;background:oklch(0 0 0/.14)}
+.tst::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:currentColor;opacity:.4;transform-origin:left;animation:tdrain var(--d,5s) linear forwards}
+.tst:hover::after{animation-play-state:paused}
+.tst.out{opacity:0;transform:translateY(-12px)}
+@keyframes tdown{from{opacity:0;transform:translateY(-14px)}}
+@keyframes tdrain{to{transform:scaleX(0)}}
+html[data-calm] .tst{animation:none}
 #dock{display:flex;align-items:center;gap:14px;font-size:12px}
 .dk{display:flex;align-items:center;gap:10px;color:var(--tx)}
 .dkb{display:inline-block;width:90px;height:4px;background:var(--line);overflow:hidden}.dkb i{display:block;height:100%;background:var(--ac)}
@@ -212,6 +226,11 @@ html[data-calm] *{transition:none!important;animation:none!important}
 .ba .b{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
 .ba input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;background:none}
 .ba::after{content:"";position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--ac);pointer-events:none}
+.wn .kd{font-weight:600;color:var(--ac)}.hnw{margin:10px 0 16px;padding:0;list-style:none;font-size:13px;max-width:520px}.hnw li{padding-left:14px;position:relative;opacity:.9;margin-top:3px}.hnw li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:2px;background:var(--ac)}
+.wl{grid-column:1/-1;display:flex;flex-direction:column}.wh{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;color:var(--dim);font-size:13px;margin:0 0 14px;line-height:1.5}.wh .warn{color:var(--ac)}
+.wr{display:flex;align-items:center;gap:16px;padding:12px 0;border-top:1px solid var(--line)}.wr .wc{flex:0 0 52px;height:78px;border-radius:4px;overflow:hidden;position:relative;display:grid;place-items:center;background:var(--bg2);font:700 22px var(--disp);color:var(--dim)}.wr .wc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.wr .wt{flex:1;min-width:0}.wr .wt b{display:block;font:600 16px var(--body)}.wr .wt span{color:var(--dim);font-size:13px}
+.go[aria-pressed=true]{background:var(--bg2);color:var(--tx);box-shadow:inset 0 0 0 1px var(--ac)}
+.bas{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}.bat{padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--dim);font:12px var(--body);cursor:pointer}.bat:hover{color:var(--tx)}.bat[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:var(--onac);font-weight:600}
 .ba .tg{position:absolute;top:10px;padding:2px 8px;background:oklch(0 0 0/.55);color:#fff;font-size:11px;border-radius:2px}
 /* ===== «ліхтар»: рух і світло ===== */
 :root{--mx:-999px;--my:-999px}
@@ -403,13 +422,6 @@ html[data-calm] .mk.big path{stroke-dashoffset:0}html[data-calm] .mk.big circle{
 .e li{display:grid;grid-template-columns:92px 1fr;gap:12px;padding-left:0}
 .e li .k{color:var(--dim);font-size:12px;padding-top:2px}
 /* ===== сповіщення ===== */
-#toasts{position:fixed;top:46px;right:18px;z-index:60;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 36px));pointer-events:none}
-.tst{pointer-events:auto;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:14px 12px 14px 16px;background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--ac);border-radius:4px;box-shadow:0 18px 44px -12px oklch(0 0 0/.6);font-size:14px;line-height:1.4;animation:tin .28s cubic-bezier(.2,.7,.2,1);transition:opacity .25s,transform .25s}
-.tst i{width:8px;height:8px;margin-top:6px;border-radius:50%;background:var(--ac)}
-.tst.err{border-left-color:oklch(.66 .2 25)}.tst.err i{background:oklch(.66 .2 25)}
-.tst.ok{border-left-color:oklch(.72 .15 150)}.tst.ok i{background:oklch(.72 .15 150)}
-.tst button{padding:0 6px;color:var(--dim);font-size:20px;line-height:1}.tst button:hover{color:var(--tx)}
-.tst.out{opacity:0;transform:translateX(24px)}
 @keyframes tin{from{opacity:0;transform:translateX(24px)}}
 .alert{font-size:14px;padding:14px 16px;border-left-width:4px}
 .warnline{color:var(--tx);padding-left:12px;border-left:3px solid var(--ac)}
@@ -431,6 +443,8 @@ dialog.md::backdrop{background:oklch(0 0 0/.6)}
 .fl label{display:block;margin-bottom:6px;font-size:12px;color:var(--dim)}
 .fl select,.fl textarea{width:100%;padding:9px 11px;background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--tx);font:14px var(--body)}
 .fl textarea{min-height:100px;resize:vertical}
+#md-tx{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}#md-tx[hidden]{display:none}#md-tx .fl:first-child{grid-column:1/-1}dialog.md.tall[open]{height:min(720px,94vh)}
+.md-in{width:100%;padding:9px 11px;background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--tx);font:14px var(--body)}.md-in:focus{outline:0;border-color:var(--ac)}
 .fl select:focus,.fl textarea:focus{outline:0;border-color:var(--ac)}
 .md-e{min-height:18px;margin:-6px 0;font-size:13px;color:oklch(.7 .2 25)}.md-e.ok{color:oklch(.74 .15 150)}
 .md-b{display:flex;align-items:center;gap:22px}
@@ -505,8 +519,6 @@ html[data-calm] .mk.big .fl{opacity:1}
 .pill{padding:9px 18px;border-radius:999px;background:var(--ac);color:var(--onac);font:600 14px var(--body)}
 .pill:hover{filter:brightness(1.08)}.pill[hidden]{display:none}
 #splash{inset:56px 0 0 0}
-#toasts{top:68px}
-.tst{border-radius:14px}
 .main{grid-template-columns:72px 1fr}
 nav{width:72px;padding:12px 0;border-right:0;background:var(--bg)}
 html[data-rail=hover] nav:hover,nav:has(:focus-visible){width:220px}
@@ -546,6 +558,7 @@ nav .g[aria-current=true]{background:var(--sf3);color:var(--tx);box-shadow:none}
 .tile{border-radius:var(--r1)}
 .tile .nm{opacity:1;transform:none;padding:48px 12px 12px;font:700 16px/1.15 var(--body)}
 .tile .nm small{font-weight:500}
+.tile.hp .nm{padding-bottom:26px}.tile .pgb{position:absolute;left:12px;right:12px;bottom:12px;height:4px;z-index:3;border-radius:2px;background:oklch(1 0 0/.24);overflow:hidden}.tile .pgb::after{content:"";position:absolute;left:0;top:0;bottom:0;width:max(var(--pg),6px);background:var(--ac);border-radius:2px;box-shadow:0 0 8px var(--ac)}
 .tile.off img{filter:grayscale(.9) brightness(.72)}
 .tile.on::before{display:none}
 .tile .bdg{top:10px;right:10px;left:auto;width:auto;height:auto;padding:3px 10px;border-radius:999px;background:var(--ac);color:var(--onac);box-shadow:none;font:600 11px var(--body)}
@@ -639,6 +652,32 @@ nav .g,nav .g[aria-current=true]{padding:0;align-items:center}
 .sp-core .sp-n{margin-top:28px;font-size:12px;color:var(--dim)}
 @media (max-width:760px){.stage{padding:22px 20px}.st{grid-template-columns:1fr}.st-nav{flex-direction:row;overflow-x:auto;border:0;position:static}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- «Що нового» після оновлення Ліхтаря ---- */
+dialog.wn{width:min(560px,92vw);padding:0;border:1px solid var(--line);border-radius:8px;background:var(--bg2);color:var(--tx);box-shadow:0 40px 100px -20px oklch(0 0 0/.75);overflow:hidden}
+dialog.wn[open]{display:flex;flex-direction:column;max-height:min(680px,90vh);animation:rise .35s cubic-bezier(.2,.7,.2,1)}
+dialog.wn::backdrop{background:oklch(0 0 0/.62);backdrop-filter:blur(3px)}
+.wn-h{position:relative;display:flex;align-items:center;gap:18px;padding:28px 30px 22px;border-bottom:1px solid var(--line);background:radial-gradient(120% 140% at 0 0,color-mix(in oklch,var(--ac) 16%,transparent),transparent 62%)}
+.wn-lamp{flex:none;width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:color-mix(in oklch,var(--ac) 14%,var(--bg2));border:1px solid color-mix(in oklch,var(--ac) 40%,transparent);box-shadow:0 0 28px -4px color-mix(in oklch,var(--ac) 55%,transparent);color:var(--ac)}
+.wn-lamp svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.wn-k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.wn-h h2{margin:4px 0 0;font:700 28px/1.1 var(--disp);display:flex;align-items:baseline;gap:12px}
+.wn-v{font:700 15px/1 var(--body);color:var(--onac);background:var(--ac);padding:5px 10px;border-radius:999px;letter-spacing:.02em}
+.wn-b{padding:8px 30px 4px;overflow:auto;font-size:15px;line-height:1.5}
+.wn-s{padding:18px 0 6px}.wn-s+.wn-s{border-top:1px solid var(--line)}
+.wn-s h3{display:flex;align-items:center;gap:10px;margin:0 0 12px;font:700 12px/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.wn-s h3 i{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:5px;background:var(--line);color:var(--tx)}.wn-s h3 i svg{width:12px;height:12px;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.wn-s.new h3{color:var(--ac)}.wn-s.new h3 i{background:var(--ac);color:var(--onac)}
+.wn-s ul{list-style:none;margin:0;padding:0 0 0 9px;border-left:1px solid var(--line);display:grid;gap:11px}
+.wn-s.new ul{border-left-color:color-mix(in oklch,var(--ac) 55%,transparent)}
+.wn-s li{position:relative;padding-left:14px}
+.wn-s li:before{content:"";position:absolute;left:-12.5px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--bg2);border:1.5px solid var(--dim)}
+.wn-s.new li:before{border-color:var(--ac);background:var(--ac)}
+.wn-b b{color:var(--tx);font-weight:650}.wn-b code{font-size:.9em;padding:1px 6px;border-radius:4px;background:var(--line)}
+.wn-b p{margin:8px 0;color:var(--dim)}
+.wn-f{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 30px 24px;border-top:1px solid var(--line);margin-top:10px}
+.wn-f a{font-size:13px;color:var(--dim);border-bottom:1px solid var(--line)}.wn-f a:hover{color:var(--ac);border-color:var(--ac)}
+.wn-f button{background:var(--ac);color:var(--onac);padding:11px 26px;border-radius:5px;font-weight:650;font-size:14.5px}.wn-f button:hover{filter:brightness(1.1)}
 </style>
 </head>
 <body class="loading">
@@ -671,6 +710,11 @@ nav .g,nav .g[aria-current=true]{padding:0;align-items:center}
     <p class="md-s">Напишіть, що сталося. Дані про систему додамо самі.</p>
     <div class="fl"><label>Що не так</label><div class="dd" id="dd-t"></div></div>
     <div class="fl"><label>Гра</label><div class="dd" id="dd-g"></div></div>
+    <div id="md-tx" hidden>
+      <div class="fl"><label for="md-w">Де це в грі</label><input id="md-w" class="md-in" placeholder="Наприклад: меню налаштувань, діалог з торговцем"></div>
+      <div class="fl"><label for="md-was">Як написано зараз</label><input id="md-was" class="md-in" placeholder="Текст з помилкою"></div>
+      <div class="fl"><label for="md-ok">Як має бути</label><input id="md-ok" class="md-in" placeholder="Правильний варіант"></div>
+    </div>
     <div class="fl"><label for="md-d">Опис</label><textarea id="md-d" rows="4" placeholder="Наприклад: у меню налаштувань частина тексту англійською"></textarea></div>
     <label class="chk"><input type="checkbox" id="md-c" checked> Додати версію Ліхтаря та дані про систему</label>
     <div class="md-e" id="md-e"></div>
@@ -681,18 +725,51 @@ nav .g,nav .g[aria-current=true]{padding:0;align-items:center}
 <script>
 const T = window.__TAURI__, DEMO = !T?.core;
 const SUPPORT = {email:'hopethatislight@gmail.com', issues:'https://github.com/gustihax/lichtar/issues'};
-
+/* Віддалений каталог (GitHub raw). Порожньо = беремо вбудований BUNDLED нижче. */
 const CATALOG_URL = 'https://raw.githubusercontent.com/gustihax/lichtar-catalog/main/catalog.json';
-
-const NEWS_FEEDS = [{name:'Таємна кімната', url:'https://tayemnakimnata.com/feed/'}, {name:'УНІАН', url:'https://rss.unian.net/site/news_ukr.rss'}];
-const NEWS_RE = /українізатор|локалізац|українськ(а|у|ою|ої)\s+мов|переклад\S*\s+українськ/i;
+/* Живі стрічки новин (RSS). З кожної беруться лише матеріали про українізацію. */
+const NEWS_FEEDS = [
+  {name:'Таємна кімната', url:'https://tayemnakimnata.com/feed/'},
+  {name:'ITC.ua', url:'https://itc.ua/ua/feed/'},
+  {name:'Root Nation', url:'https://root-nation.com/ua/feed/'},
+  {name:'Mezha', url:'https://mezha.media/feed/'},
+  {name:'УНІАН', url:'https://rss.unian.net/site/news_ukr.rss'}
+];
+/* «українізатор» підходить завжди; «локалізація/переклад/українською» лише разом зі словами про ігри */
+const NEWS_RE = /українізатор|україніз\S*\s+(гр|ігор|ігр)/i;
+const NEWS_WEAK = /локалізац|українськ\S*\s+(мов|озвучк|переклад)|переклад\S*\s+українськ|озвучк\S*\s+українськ/i;
+const NEWS_GAME = /(^|[^а-яіїєґ])гр[аиуіо]([^а-яіїєґ]|$)|ігр|steam|gog|epic|playstation|xbox|nintendo|геймер|game/i;
+const isNewsHit = t => NEWS_RE.test(t) || (NEWS_WEAK.test(t) && NEWS_GAME.test(t));
 const MONTHS = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
-
+/* Новини про патчі збираються самі з історії змін ігор у каталозі: вручну їх писати не треба */
+function parseUaDate(str){
+  const m = /(\d{1,2})\s+([а-яіїєґ]+)(?:\s+(\d{4}))?/i.exec(String(str || '')); if (!m) return null;
+  const mi = MONTHS.indexOf(m[2].toLowerCase()); if (mi < 0) return null;
+  const now = new Date(); let d = new Date(m[3] ? +m[3] : now.getFullYear(), mi, +m[1]);
+  if (!m[3] && d - now > 864e5) d = new Date(d.getFullYear() - 1, mi, +m[1]);
+  return d;
+}
+function logNews(list){
+  const out = [];
+  for (const g of list || []) {
+    const log = Array.isArray(g.log) ? g.log : [];
+    log.forEach((e, i) => {
+      const d = parseUaDate(e && e.d); if (!d || !Array.isArray(e.i)) return;
+      const first = i === log.length - 1, lines = e.i.map(x => Array.isArray(x) ? x[1] : x).filter(Boolean);
+      out.push({ts: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, d: `${d.getDate()} ${MONTHS[d.getMonth()]}`,
+        tag: g.wip ? 'У роботі' : first ? 'Новий переклад' : 'Патч', t: g.wip ? g.name : first ? `Вийшов переклад ${g.name}` : `${g.name}: оновлення ${e.v}`, x: lines.slice(0, 2).join('. '), game: g.id});
+    });
+  }
+  return out;
+}
+const mergeNews = (...lists) => lists.flat().sort((a, b) => (b.ts || '').localeCompare(a.ts || '')).slice(0, 12);
+/* Адреса збору анонімної статистики (порожньо = нічого не надсилається) */
 const STATS_URL = '';
 const $ = s => document.querySelector(s);
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* У програмі (Tauri) усе реальне. Лише в браузерному прев'ю працює мінімальне демо. */
 const demo = async (c,a) => { await sleep(120);
   const m = {get_paths:{}, installed_versions:{gunbrella:{version:'0.9.0',build:null}}, verify_install:{missing:[],changed:[]}, game_build:null, startup_link:null, read_log:'(демо) подій ще немає', log_event:null, cancel_install:null, post_json:null, validate_game_dir:true, pick_folder:'D:\\Games\\Custom', set_path:null, open_folder:null, rollback:null, play_game:null, storage_info:{log:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar\\lichtar.log',dir:'C:\\Users\\you\\AppData\\Roaming\\ua.lichtar',backups:48230000,cache:3100000}, clear_cache:3100000};
   if (c==='detect_game') return a.exes[0]==='BloodWest.exe' ? 'D:\\Games\\Blood West' : a.exes[0]==='Gunbrella.exe' ? 'D:\\Games\\Gunbrella' : null;
@@ -703,6 +780,9 @@ const win = T?.window?.getCurrentWindow?.();
 $('#min').onclick = () => win?.minimize();
 $('#cls').onclick = () => win?.close();
 
+/* ---- вбудований каталог. У релізі його замінює catalog.json з GitHub / адмінки ---- */
+/* Вбудований резервний каталог (для першого запуску без мережі). Генерується: python tools/sync_bundled.py */
+/*BUNDLED:start*/
 const BUNDLED = {
   "news": [
     {
@@ -825,7 +905,7 @@ const HOME = {id:'home',home:true,name:'Ліхтар',hue:75};
 let featuredId = null, recovered = [];
 let games = [HOME], news = [], sel = 0, view = 'home', busy = null, armed = false, q = '', flt = 'all', catSource = 'вбудований', catErr = '';
 const PK = 'lichtar.prefs';
-const DEF = {mode:'auto',tint:'neutral',accent:75,closeOnPlay:false,autoUpdate:true,stats:false,steamBg:true,calm:false,railHover:true,autoCatalog:true,confirmRollback:true,catalogUrl:''};
+const DEF = {mode:'auto',tint:'neutral',accent:75,closeOnPlay:false,autoUpdate:true,stats:false,steamBg:true,calm:false,railHover:true,autoCatalog:true,confirmRollback:true,catalogUrl:'',watch:[]};
 const prefs = Object.assign({}, DEF, (()=>{ try { return JSON.parse(localStorage.getItem(PK)) || {}; } catch { return {}; } })());
 const savePrefs = () => { try { localStorage.setItem(PK, JSON.stringify(prefs)); } catch {} };
 const applyTheme = () => { const r = document.documentElement; prefs.mode === 'auto' ? r.removeAttribute('data-theme') : r.setAttribute('data-theme', prefs.mode); r.toggleAttribute('data-calm', !!prefs.calm); r.dataset.rail = prefs.railHover ? 'hover' : 'fixed'; r.dataset.tint = prefs.tint; };
@@ -835,19 +915,40 @@ const safeUrl = u => /^https?:\/\//i.test(u || '') ? u : '';
 const go = (v, i) => { view = v; if (v !== 'games') { q = ''; const g0 = document.getElementById('gs'); if (g0) g0.value = ''; } if (i != null) sel = i; armed = false; render(); };
 const state = g => g.home ? 'home' : (g.wip && !g.cur) ? 'soon' : !g.path ? 'path' : !g.cur ? 'install' : g.cur !== g.version ? 'update' : g.issue ? 'repair' : 'ready';
 const label = {path:'Вказати теку гри',install:'Встановити',update:'Оновити',repair:'Відновити',ready:'Грати',soon:'Скоро'};
+const isWatch = id => (prefs.watch || []).includes(id);
+const soonText = g => isWatch(g.id) ? 'Сповіщення увімкнено' : 'Повідомити, коли вийде';
+function toggleWatch(g){
+  const w = new Set(prefs.watch || []);
+  if (w.has(g.id)) { w.delete(g.id); notify(`Сповіщення про ${g.name} вимкнено`, 'info'); }
+  else { w.add(g.id); notify(`Скажемо, коли вийде переклад ${g.name}`, 'ok'); }
+  prefs.watch = [...w]; savePrefs(); render();
+}
+function announceReleased(){
+  const watched = prefs.watch || [];
+  const out = games.filter(g => !g.home && watched.includes(g.id) && !g.wip);
+  if (!out.length) return;
+  prefs.watch = watched.filter(id => !out.some(g => g.id === id)); savePrefs();
+  notify(out.length === 1 ? `Вийшов переклад ${out[0].name}. Він уже в каталозі` : `Вийшли переклади: ${out.map(g => g.name).join(', ')}`, 'ok');
+}
 const KIND_ERR = /^(Помилка|Не вдалося|Каталог не оновлено|Файл «|Мало місця|У цій теці немає|Лише в програмі)|не знайдено|патча ще немає/i;
 const KIND_OK = /встановлено|скопійовано|збережено|оновлено|повернуто|скинуто|Знайдено/i;
+let subTm = 0;
+const TI = {ok:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/>', err:'<path d="M12 4l9.5 16.5h-19z"/><path d="M12 10v4.2M12 17.4v.1"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.2M12 7.9v.1"/>'};
 function notify(t, kind){
   kind = kind || (KIND_ERR.test(t) ? 'err' : KIND_OK.test(t) ? 'ok' : 'info');
-  const box = $('#toasts'), el = document.createElement('div');
-  el.className = 'tst ' + kind; el.setAttribute('role', 'status');
-  el.innerHTML = '<i></i><span></span><button aria-label="Закрити">×</button>';
+  const box = $('#toasts'); clearTimeout(subTm); box.replaceChildren();
+  const sb = $('.sb')?.getBoundingClientRect();
+  box.style.top = (sb ? Math.round(sb.bottom) + 10 : 68) + 'px';
+  const ms = Math.min(9000, Math.max(3500, t.length * 70)) + (kind === 'err' ? 2500 : 0);
+  const el = document.createElement('div');
+  el.className = 'tst ' + kind; el.setAttribute('role', kind === 'err' ? 'alert' : 'status'); el.style.setProperty('--d', ms + 'ms');
+  el.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${TI[kind] || TI.info}</svg><span></span><button aria-label="Закрити"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:15px;height:15px"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;
   el.querySelector('span').textContent = t;
-  const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 250); };
+  const kill = () => { clearTimeout(subTm); el.classList.add('out'); setTimeout(() => el.remove(), 260); };
   el.querySelector('button').onclick = kill;
-  let tm = setTimeout(kill, kind === 'err' ? 8000 : 5000);
-  el.onmouseenter = () => clearTimeout(tm); el.onmouseleave = () => { tm = setTimeout(kill, 2500); };
-  box.append(el); while (box.children.length > 4) box.firstChild.remove();
+  const arm = left => { clearTimeout(subTm); subTm = setTimeout(kill, left); };
+  arm(ms); el.onmouseenter = () => clearTimeout(subTm); el.onmouseleave = () => arm(2500);
+  box.append(el);
 }
 const setStatus = t => notify(t);
 
@@ -884,7 +985,7 @@ async function load(force = false){
     const [paths, vers] = await Promise.all([call('get_paths'), call('installed_versions')]);
     mark(2,'Шукаю ігри на комп’ютері');
     cat.games.forEach(g => { if (g.progress == null && g.translationProgress != null) g.progress = Number(g.translationProgress); g.wip = !g.url; });
-    games = [HOME, ...cat.games]; news = cat.news || []; featuredId = cat.featured || null;
+    games = [HOME, ...cat.games]; news = mergeNews(cat.news || [], logNews(cat.games)); featuredId = cat.featured || null;
     await Promise.all(games.slice(1).map(async g => {
       g.cur = vers[g.id]?.version || null; g.curBuild = vers[g.id]?.build || null;
       const saved = paths[g.id];
@@ -896,15 +997,16 @@ async function load(force = false){
     mark(3,'Звіряю версії');
     await sleep(200);
     mark(4,'Готово');
+    loadDl().then(() => { if (view === 'game' && !job) render(); });
   } catch(e){ console.error(e); if (games.length < 2) { games = [HOME, ...BUNDLED.games]; news = BUNDLED.news; } }
 }
 async function liveNews(){
   const out = [];
   await Promise.all(NEWS_FEEDS.map(async f => { try {
-    const doc = new DOMParser().parseFromString(await call('fetch_text',{url:f.url}), 'text/xml');
+    const doc = new DOMParser().parseFromString(await getText(f.url), 'text/xml');
     doc.querySelectorAll('item').forEach(it => {
       const t = it.querySelector('title')?.textContent?.trim(), l = it.querySelector('link'), u = (l?.textContent || l?.getAttribute('href') || '').trim(), dt = new Date(it.querySelector('pubDate')?.textContent);
-      if (!t || !u || isNaN(dt) || !NEWS_RE.test(t)) return;
+      if (!t || !u || isNaN(dt) || !isNewsHit(t)) return;
       out.push({ts: dt.toISOString().slice(0,10), d: `${dt.getDate()} ${MONTHS[dt.getMonth()]}`, tag: f.name, t, u});
     });
   } catch {} }));
@@ -912,7 +1014,7 @@ async function liveNews(){
 }
 async function refreshNews(){
   const live = await liveNews(); if (!live.length) return;
-  news = [...live, ...news.filter(n => !live.some(l => l.u === n.u))].sort((a,b) => (b.ts||'').localeCompare(a.ts||'')).slice(0, 12);
+  news = mergeNews(live, news.filter(n => !live.some(l => l.u === n.u)));
   if (view === 'home') render();
 }
 async function splash(){
@@ -933,6 +1035,8 @@ async function splash(){
   document.body.classList.remove('loading'); el.classList.add('out'); await sleep(550); el.remove();
   call('startup_link').then(u => u && openLink(u)).catch(()=>{});
   refreshNews();
+  setTimeout(checkWhatsNew, 1800);
+  setTimeout(announceReleased, recovered.length ? 7000 : 600);
   if (recovered.length) notify('Гру повернено до початкового стану після перерваного встановлення: ' + recovered.join(', '), 'ok');
   if (prefs.autoUpdate) checkSelf(false);
 }
@@ -990,14 +1094,18 @@ const ACT = {update:'Оновити', install:'Встановити', ready:'Г�
 const steamImg = (g, kind) => g.steam_appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/${kind}.jpg` : '';
 function quick(i){ const keep = sel; sel = i; act(); sel = keep; }
 const CHEV = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+function heroNew(x){
+  const lines = newer(x).flatMap(e => e.i.map(([k,t]) => t)).slice(0, 3);
+  return lines.length ? `<ul class="hnw">${lines.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+}
 function renderHome(){
   const gs = games.filter(x => !x.home);
   const rank = x => ({update:0, repair:1, ready:2, install:3, path:4, soon:5}[state(x)] ?? 6);
   const pick = gs.find(x => state(x) === 'update') || gs.find(x => x.id === featuredId) || [...gs].sort((a,b) => rank(a) - rank(b))[0];
-  const subline = (x, st) => st === 'update' ? `Оновлення ${esc(x.cur)} → ${esc(x.version)}, ${esc(x.size)}` : st === 'repair' ? 'Потрібне відновлення українізатора' : st === 'ready' ? `Українізатор ${esc(x.cur)}${x.progress != null ? ', ' + x.progress + '% перекладено' : ''}` : st === 'soon' ? `Переклад у роботі${x.progress != null ? ', ' + x.progress + '%' : ''}` : st === 'path' ? 'Гру не знайдено на цьому ПК' : `Український переклад${x.progress != null ? ', ' + x.progress + '%' : ''}`;
+  const subline = (x, st) => st === 'update' ? `Оновлення ${esc(x.cur)} → ${esc(x.version)}, ${esc(szf(x.size))}` : st === 'repair' ? 'Потрібне відновлення українізатора' : st === 'ready' ? `Українізатор ${esc(x.cur)}${x.progress != null ? ', ' + x.progress + '% перекладено' : ''}` : st === 'soon' ? `Переклад у роботі${x.progress != null ? ', ' + x.progress + '%' : ''}` : st === 'path' ? 'Гру не знайдено на цьому ПК' : `Український переклад${x.progress != null ? ', ' + x.progress + '%' : ''}`;
   let hero = '';
   if (pick) { const i = games.indexOf(pick), st = state(pick), art = steamImg(pick, 'library_hero'), cv = cover(pick);
-    hero = `<div class="sl one" data-i="${i}" tabindex="0" style="--th:${esc(pick.hue)}"><span class="fb">${esc(pick.name[0])}</span>${art ? `<img class="bgimg" src="${esc(art)}" alt="">` : ''}<div class="sc">${cv ? `<img class="sth" src="${esc(cv)}" alt="">` : ''}<h3>${esc(pick.name)}</h3><p>${subline(pick, st)}</p><button class="go pl" data-q="${i}"><span>${ACT[st]}</span></button></div></div>`; }
+    hero = `<div class="sl one" data-i="${i}" tabindex="0" style="--th:${esc(pick.hue)}"><span class="fb">${esc(pick.name[0])}</span>${art ? `<img class="bgimg" src="${esc(art)}" alt="">` : ''}<div class="sc">${cv ? `<img class="sth" src="${esc(cv)}" alt="">` : ''}<h3>${esc(pick.name)}</h3><p>${subline(pick, st)}</p>${heroNew(pick)}<button class="go pl" data-q="${i}"><span>${st === 'soon' ? esc(soonText(pick)) : ACT[st]}</span></button></div></div>`; }
   const feed = news.map((n, i) => { const im = safeUrl(n.img), gi = games.findIndex(x => x.id === n.game);
     return `<article class="nw rv${i ? '' : ' top'}${im ? ' has' : ''}"><div class="d">${esc(n.d)}<b>${esc(n.tag)}</b></div>${im ? `<img class="nimg" src="${esc(im)}" alt="" loading="lazy">` : ''}<h4>${safeUrl(n.u) ? `<a href="${esc(n.u)}">${esc(n.t)}</a>` : esc(n.t)}</h4>${n.x ? `<p>${esc(n.x)}</p>` : ''}${gi > 0 ? `<button class="go2" data-i="${gi}">До гри →</button>` : ''}</article>`; }).join('');
   $('#stage').innerHTML = `<div class="hm"><div class="hl">
@@ -1017,20 +1125,78 @@ function renderHome(){
 }
 
 const cover = g => safeUrl(g.cover) || (g.steam_appid ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${g.steam_appid}/library_600x900.jpg` : '');
-const FLT = [['all','Усі'],['installed','Встановлені'],['update','Є оновлення'],['missing','Не знайдено']];
+const FLT = [['all','Усі'],['installed','Встановлені'],['update','Є оновлення'],['missing','Не знайдено'],['wish','Хочу переклад']];
 function renderGames(){
   $('#stage').innerHTML = `<h2 class="h2">Каталог</h2><p class="note" style="margin-top:6px">${games.length-1} ігор, ${games.filter(x=>x.cur).length} встановлено${games.filter(x=>state(x)==='update').length?`, ${games.filter(x=>state(x)==='update').length} з оновленнями`:''}</p>
-    <div class="tools"><div class="chips">${FLT.map(([k,t])=>`<button class="chip" aria-pressed="${flt===k}" data-f="${k}">${t}</button>`).join('')}</div><a class="tl" href="${esc(SUPPORT.issues)}" target="_blank" rel="noopener">Запропонувати гру</a></div>
+    <div class="tools"><div class="chips">${FLT.map(([k,t])=>`<button class="chip" aria-pressed="${flt===k}" data-f="${k}">${t}</button>`).join('')}</div><button class="tl" id="sg">Запропонувати гру</button></div>
     <div class="grid" id="grid"></div>`;
   document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ flt = b.dataset.f; renderGames(); });
+  $('#sg').onclick = () => openUrl(`${SUPPORT.issues}/new?title=${encodeURIComponent('Хочу переклад: ')}&body=${encodeURIComponent('Назва гри:\nПосилання на Steam:\nЧому саме ця гра:\n')}`);
   fillGrid();
 }
 function tileHtml(g, i, n){
   const c = cover(g), st = state(g);
   const sub = st === 'update' ? 'Є оновлення' : st === 'repair' ? 'Потрібне відновлення' : st === 'soon' ? 'У роботі' + (g.progress != null ? ', ' + g.progress + '%' : '') : st === 'path' ? 'Не знайдено на ПК' : st === 'ready' ? 'Встановлено ' + esc(g.cur) : (g.progress != null ? g.progress + '% перекладено' : 'Не встановлено');
-  return `<button class="tile ${g.cur ? 'on' : 'off'}" data-i="${i}" aria-label="${esc(g.name)}" style="--th:${esc(g.hue)};--i:${n}"><span class="fb">${esc(g.name[0])}</span>${c ? `<span class="pic"><img src="${esc(c)}" alt="" loading="lazy"></span>` : ''}${st === 'update' ? '<i class="bdg">Оновлення</i>' : g.badge ? `<i class="bdg">${esc(g.badge)}</i>` : ''}<span class="nm">${esc(g.name)}<small>${sub}</small></span></button>`;
+  return `<button class="tile ${g.cur ? 'on' : 'off'}${g.progress != null && g.progress < 100 ? ' hp' : ''}" data-i="${i}" aria-label="${esc(g.name)}" style="--th:${esc(g.hue)};--i:${n}"><span class="fb">${esc(g.name[0])}</span>${c ? `<span class="pic"><img src="${esc(c)}" alt="" loading="lazy"></span>` : ''}${g.progress != null && g.progress < 100 ? `<i class="pgb" style="--pg:${Math.max(0, Math.min(100, +g.progress))}%" title="Переклад: ${esc(g.progress)}%"></i>` : ''}${st === 'update' ? '<i class="bdg">Оновлення</i>' : g.badge ? `<i class="bdg">${esc(g.badge)}</i>` : ''}<span class="nm">${esc(g.name)}<small>${sub}</small></span></button>`;
+}
+const openUrl = async u => { try { await call('open_url', {url: u}); } catch { window.open(u, '_blank'); } };
+const WISH_KEY = 'lichtar.wish';
+let wish = null, wishErr = '';
+const issuesApi = () => SUPPORT.issues.replace('https://github.com/', 'https://api.github.com/repos/');
+let dlErr = '';
+const DL_KEY = 'lichtar.dl';
+let dl = (() => { try { return JSON.parse(localStorage.getItem(DL_KEY)).map || {}; } catch { return {}; } })();
+const catalogRepo = () => { const m = String(prefs.catalogUrl || CATALOG_URL).match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//); return m ? m[1] + '/' + m[2] : ''; };
+/* GitHub сам рахує завантаження файлів релізу; тег патча має вигляд id-гри-v1.2.3 */
+async function loadDl(force){
+  const repo = catalogRepo(); if (!repo) { dlErr = 'адресу каталогу не з raw.githubusercontent.com'; return; }
+  try { const c = JSON.parse(localStorage.getItem(DL_KEY)); if (!force && c && c.repo === repo && Date.now() - c.t < 1800000) { dl = c.map || {}; return; } } catch {}
+  try {
+    const map = {};
+    for (let page = 1; page <= 5; page++) {
+      const arr = JSON.parse(await getText(`https://api.github.com/repos/${repo}/releases?per_page=100&page=${page}`));
+      if (!Array.isArray(arr)) throw new Error('несподівана відповідь');
+      for (const r of arr) {
+        if (r.draft || r.prerelease) continue;
+        const m = /^(.+)-v\d[\w.\-]*$/.exec(r.tag_name || ''); if (!m) continue;
+        map[m[1]] = (map[m[1]] || 0) + (r.assets || []).filter(a => /\.zip$/i.test(a.name || '')).reduce((n, a) => n + (a.download_count || 0), 0);
+      }
+      if (arr.length < 100) break;
+    }
+    dl = map; dlErr = ''; try { localStorage.setItem(DL_KEY, JSON.stringify({t: Date.now(), repo, map})); } catch {}
+  } catch(e){ console.warn('лічильник завантажень', e); dlErr = String(e.message || e); }
+}
+async function getText(url){
+  let t; try { t = await call('fetch_text', {url}); } catch {}
+  if (typeof t === 'string' && t) return t;
+  const r = await fetch(url, {cache: 'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); return r.text();
+}
+async function loadWish(force){
+  if (!force) { try { const c = JSON.parse(localStorage.getItem(WISH_KEY)); if (c && Array.isArray(c.items) && Date.now() - c.t < 1800000) { wish = c.items; wishErr = ''; return; } } catch {} }
+  try {
+    const arr = JSON.parse(await getText(`${issuesApi()}/issues?labels=wish&state=open&per_page=50`));
+    if (!Array.isArray(arr)) throw new Error('несподівана відповідь');
+    wish = arr.filter(x => !x.pull_request && /^https:\/\/github\.com\//.test(x.html_url || '')).map(x => ({name: String(x.title || '').replace(/^(Хочу переклад|Wish)\s*:\s*/i, '').trim() || 'Без назви', url: x.html_url, votes: x.reactions?.['+1'] || 0, appid: (String(x.body || '').match(/store\.steampowered\.com\/app\/(\d+)/) || [])[1] || ''})).sort((a, b) => b.votes - a.votes);
+    wishErr = ''; try { localStorage.setItem(WISH_KEY, JSON.stringify({t: Date.now(), items: wish})); } catch {}
+  } catch(e){
+    wishErr = String(e.message || e);
+    if (!wish) { try { wish = JSON.parse(localStorage.getItem(WISH_KEY)).items || []; } catch { wish = []; } }
+  }
+}
+const votes = n => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'голос' : [2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100) ? 'голоси' : 'голосів'}`;
+async function renderWish(force){
+  const box = $('#grid'); if (!box) return;
+  box.innerHTML = '<div class="empty"><i></i>Завантажую пропозиції…</div>';
+  await loadWish(force);
+  if (flt !== 'wish' || !$('#grid')) return;
+  const items = wish || [];
+  $('#grid').innerHTML = `<div class="wl"><div class="wh"><span>Ігри, які просять перекласти. Натисніть «Підтримати» та поставте 👍 на сторінці пропозиції (потрібен вхід у GitHub). Найпопулярніші переклади беремо в роботу першими.${wishErr ? ' <b class="warn">Не вдалося оновити: ' + esc(wishErr) + '</b>' : ''}</span><button class="tl" id="wr">Оновити</button></div>${items.length ? items.map(w => `<div class="wr"><div class="wc"><span>${esc(w.name[0] || '?')}</span>${w.appid ? `<img src="https://cdn.cloudflare.steamstatic.com/steam/apps/${esc(w.appid)}/library_600x900.jpg" alt="" loading="lazy">` : ''}</div><div class="wt"><b>${esc(w.name)}</b><span>${votes(w.votes)}</span></div><button class="tl" data-wu="${esc(w.url)}">Підтримати</button></div>`).join('') : '<div class="empty"><i></i>Поки що ніхто нічого не запропонував. Будьте першим: кнопка «Запропонувати гру».</div>'}</div>`;
+  document.querySelectorAll('[data-wu]').forEach(b => b.onclick = () => openUrl(b.dataset.wu));
+  document.querySelectorAll('.wc img').forEach(im => im.onerror = () => im.remove());
+  $('#wr').onclick = () => renderWish(true);
 }
 function fillGrid(){
+  if (flt === 'wish') { renderWish(); return; }
   const qq = q.trim().toLowerCase();
   const list = games.map((g,i) => [g,i]).filter(([g]) => !g.home && g.name.toLowerCase().includes(qq) && ({all:true, installed:!!g.cur, update:state(g)==='update', missing:!g.path}[flt]));
   $('#grid').innerHTML = list.length ? list.map(([g,i],n) => tileHtml(g,i,n)).join('') : '<div class="empty"><i></i>Нічого не знайдено</div>';
@@ -1041,6 +1207,8 @@ function fillGrid(){
 let tab = 'look';
 const TABS = [['look','Вигляд'],['behavior','Поведінка'],['paths','Шляхи до ігор'],['catalog','Каталог'],['data','Дані'],['about','Про Ліхтар']];
 const HUES = [25,75,140,178,255,300,350];
+/* розмір у каталозі може бути числом байтів («2007376») або готовим текстом («1,9 МБ») */
+const szf = v => /^\d+$/.test(String(v ?? '').trim()) ? fmt(+v) : String(v ?? '');
 const fmt = b => b < 1024 ? b+' Б' : b < 1048576 ? Math.round(b/1024)+' КБ' : (b/1048576).toFixed(1).replace('.',',')+' МБ';
 const sw = k => `<button class="sw" role="switch" aria-checked="${!!prefs[k]}" data-sw="${k}"></button>`;
 const seg = (k,items) => `<div class="seg">${items.map(([v,t])=>`<button aria-pressed="${prefs[k]===v}" data-seg="${k}" data-v="${v}">${t}</button>`).join('')}</div>`;
@@ -1061,6 +1229,7 @@ function panel(){
         `<button class="tl" data-a="${g.path?'op':'rt'}" data-id="${esc(g.id)}">${g.path?'Відкрити':'Знайти'}</button><button class="tl" data-a="ch" data-id="${esc(g.id)}">Змінити</button>`)).join('');
   if (tab==='catalog') return row('Джерело', esc(catSource) + (catErr ? '<br><span class="note warn">Причина: ' + esc(catErr) + '</span>' : ''), `<span>${games.length-1} ігор</span>`)
     + `<div class="sr col"><div class="rt"><b>Адреса каталогу</b><span>Якщо порожньо, береться стандартний</span></div><input class="txt" id="curl" spellcheck="false" placeholder="https://raw.githubusercontent.com/…/catalog.json" value="${esc(prefs.catalogUrl)}"></div>`
+    + row('Лічильник завантажень', dlErr ? '<span class="note warn">Не вдалося: ' + esc(dlErr) + '</span>' : 'З GitHub Releases каталогу. Показується на сторінці гри, коли є хоча б одне завантаження', `<span>${Object.values(dl).filter(n => n > 0).length} ігор</span>`)
     + row('Оновити каталог зараз','', '<button class="tl" id="rl">Оновити</button>');
   if (tab==='data') return row('Тека даних','<span class="pth" id="d-dir">…</span>','<button class="tl" id="d-open">Відкрити</button>')
     + row('Резервні копії','Оригінальні файли, щоб можна було відкотитись', '<span id="d-bk">…</span>')
@@ -1085,7 +1254,7 @@ function renderSettings(){
   on('[data-a]', b=>{ const g = gm(b.dataset.id), a = b.dataset.a;
     if (a==='op') call('open_folder',{path:g.path}).catch(e=>setStatus(String(e))); else if (a==='rt') redetect(g); else pickDir(g); });
   const cu = $('#curl'); if (cu) cu.onchange = () => { prefs.catalogUrl = cu.value.trim(); savePrefs(); setStatus('Адресу збережено. Натисніть «Оновити»'); };
-  on('#rl', async ()=>{ if (busy) return; setStatus('Оновлюю каталог…'); await load(true); render(); setStatus(catErr ? `Каталог не оновлено: ${catErr}` : `Каталог оновлено. Джерело: ${catSource}`); });
+  on('#rl', async ()=>{ if (busy) return; setStatus('Оновлюю каталог…'); await load(true); await loadDl(true); render(); setStatus(catErr ? `Каталог не оновлено: ${catErr}` : `Каталог оновлено. Джерело: ${catSource}`); });
   if (tab==='data') {
     const refresh = () => call('storage_info').then(i=>{ $('#d-dir').textContent = i.dir; logPath = i.log; $('#d-bk').textContent = fmt(i.backups); $('#d-ch').textContent = fmt(i.cache); $('#d-clr').disabled = !i.cache;
       $('#d-open').onclick = () => call('open_folder',{path:i.dir}).catch(e=>setStatus(String(e))); }).catch(e=>setStatus(String(e)));
@@ -1127,16 +1296,24 @@ function afterRender(enter){
 
 const STATUS = {complete:'Повний переклад', partial:'Частковий переклад', wip:'У роботі'};
 let allLog = false;
+const cmpIdx = {};
+const vcmp = (a, b) => { const x = String(a || '').split(/[.\-]/).map(n => parseInt(n) || 0), y = String(b || '').split(/[.\-]/).map(n => parseInt(n) || 0); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d > 0 ? 1 : -1; } return 0; };
+const KIND = {new:'Нове', fix:'Виправлено', imp:'Покращено', improve:'Покращено'};
+const newer = g => state(g) === 'update' ? (g.log || []).filter(e => e && Array.isArray(e.i) && vcmp(e.v, g.cur) > 0) : [];
 function gbody(g){
-  const c = g.compare, cmp = c && okImg(c.before) && okImg(c.after)
-    ? `<section class="gs"><h3>Як виглядає в грі</h3><figure class="ba"><img src="${esc(c.after)}" alt="Українська"><img class="b" src="${esc(c.before)}" alt="Оригінал"><span class="tg" style="left:10px">Оригінал</span><span class="tg" style="right:10px">Українська</span><input type="range" min="0" max="100" value="50" aria-label="Порівняння: оригінал і українська"></figure><p class="note">${c.caption ? esc(c.caption) + '. ' : ''}Потягніть, щоб порівняти</p></section>` : '';
-  const all = g.log || [], list = allLog ? all : all.slice(0, 3);
+  const pairs = [].concat(g.compare || []).filter(c => c && okImg(c.before) && okImg(c.after));
+  const bi = Math.min(cmpIdx[g.id] || 0, Math.max(pairs.length - 1, 0)), c = pairs[bi];
+  const cmp = c
+    ? `<section class="gs"><h3>Що змінилося</h3><figure class="ba"><img src="${esc(c.after)}" alt="Українська"><img class="b" src="${esc(c.before)}" alt="Оригінал"><span class="tg" style="left:10px">Оригінал</span><span class="tg" style="right:10px">Українська</span><input type="range" min="0" max="100" value="50" aria-label="Порівняння: оригінал і українська"></figure>${pairs.length > 1 ? `<div class="bas">${pairs.map((p, i) => `<button class="bat" data-bi="${i}" aria-pressed="${i === bi}">${esc(p.title || 'Кадр ' + (i + 1))}</button>`).join('')}</div>` : ''}<p class="note">${c.caption ? esc(c.caption) + '. ' : ''}Потягніть, щоб порівняти</p></section>` : '';
+  const nw = newer(g);
+  const all = (g.log || []).filter(e => !nw.includes(e)), list = allLog ? all : all.slice(0, 3);
   const hist = all.length ? `<section class="gs"><h3>Історія змін</h3>${list.map(e => `<div class="e"><div class="d">${esc(e.d)}</div><ul>${e.i.map(([k,t]) => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}${all.length > 3 ? `<button class="lnk" id="allog">${allLog ? 'Показати менше' : `Усі зміни (${all.length})`}</button>` : ''}</section>` : '';
-  return cmp + hist;
+  const wn = nw.length ? `<section class="gs wn"><h3>Що нового: ${esc(g.cur)} → ${esc(g.version)}</h3>${nw.map(e => `<div class="e"><div class="d">${esc(e.v)}, ${esc(e.d)}</div><ul>${e.i.map(([k,t]) => `<li>${KIND[k] ? `<b class="kd">${KIND[k]}</b> ` : ''}${esc(t)}</li>`).join('')}</ul></div>`).join('')}</section>` : '';
+  return wn + cmp + hist;
 }
 function aside(g){
   const c = cover(g);
-  const f = [['Студія', g.studio], ['Версія патча', g.version], ['Розмір', g.size], g.progress != null ? ['Переклад', g.progress >= 100 ? 'Повний' : g.progress + '%'] : null, g.font_ok === false ? ['Шрифт', 'Потрібен окремий шрифт'] : null, g.path ? ['Шлях', g.path] : null].filter(Boolean);
+  const f = [['Студія', g.studio], ['Версія патча', g.version], ['Розмір', szf(g.size)], dl[g.id] > 0 ? ['Завантажень', dl[g.id].toLocaleString('uk-UA')] : null, g.progress != null ? ['Переклад', g.progress >= 100 ? 'Повний' : g.progress + '%'] : null, g.font_ok === false ? ['Шрифт', 'Потрібен окремий шрифт'] : null, g.path ? ['Шлях', g.path] : null].filter(Boolean);
   return `<aside class="gd"><div class="cv" style="--th:${esc(g.hue)}"><span class="fb">${esc(g.name[0])}</span>${c?`<img src="${esc(c)}" alt="">`:''}</div>
     <dl class="facts">${f.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>${g.issues?.length ? `<div class="known"><b>Відомі проблеми</b><ul>${g.issues.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}</aside>`;
 }
@@ -1158,24 +1335,25 @@ function renderGame(g){
     if (g.cur) sub.push(`<button id="rb" class="${armed?'warn':''}">${armed?'Відкотити до оригіналу?':'Відкат до оригіналу'}</button>`);
     if (g.path) sub.push('<button id="op">Тека гри</button>','<button id="ch">Змінити теку</button>'); else sub.push('<button id="rt">Знайти знову</button>');
   }
-  sub.push('<button id="lk">Копіювати посилання</button>','<button id="rp">Повідомити про помилку</button>');
-  const dlc = !mine && (s==='install' || s==='update') && g.size ? `<p class="dlc">Завантаження: ${esc(g.size)}</p>` : '';
+  sub.push('<button id="lk">Копіювати посилання</button>','<button id="rp">Помилка в тексті</button>');
+  const dlc = !mine && (s==='install' || s==='update') && g.size ? `<p class="dlc">Завантаження: ${esc(szf(g.size))}</p>` : '';
   $('#stage').innerHTML = `<div class="gp"><div class="gm">
     <button class="back" id="bk">← Ігри</button>
     <div class="studio">${esc(g.studio)}</div>
     <h1 class="title ${mine?'':'idle'}" id="t" style="--p:${mine?job.pct:100}">${esc(g.name)}</h1>
     <div class="meta" id="meta">${ver}</div>
-    <div class="act"><button class="go" id="go" ${mine||queued||s==='soon'?'disabled':''} style="--f:${mine?job.pct/100:0}"><i class="fill"></i><span>${mine?Math.round(job.pct)+'%':queued?'У черзі':label[s]}</span></button></div>
+    <div class="act"><button class="go" id="go" ${s==='soon'?`aria-pressed="${isWatch(g.id)}"`:''} ${mine||queued?'disabled':''} style="--f:${mine?job.pct/100:0}"><i class="fill"></i><span>${mine?Math.round(job.pct)+'%':queued?'У черзі':s==='soon'?esc(soonText(g)):label[s]}</span></button></div>
     ${dlc}${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
     <div class="sub">${sub.join('')}</div>
     ${gbody(g)}</div>${aside(g)}</div>`;
   document.querySelectorAll('.cv img').forEach(im=>im.onerror=()=>im.remove());
   $('#go').onclick = act;
   $('#bk').onclick = () => go('games');
-  $('#rp').onclick = () => $('#sup').click();
+  $('#rp').onclick = () => openSupport(TYPES[0]);
   $('#lk').onclick = async () => { try { await navigator.clipboard.writeText(`lichtar://game/${g.id}`); setStatus('Посилання скопійовано'); } catch { setStatus('Не вдалося скопіювати'); } };
   $('#cx')?.addEventListener('click', () => { if (mine) call('cancel_install',{id:g.id}); else { queue = queue.filter(x=>x!==g.id); dock(); render(); } });
   document.querySelectorAll('.ba input').forEach(i=>i.oninput=()=>i.parentElement.style.setProperty('--x', i.value+'%'));
+  document.querySelectorAll('.bat').forEach(b=>b.onclick=()=>{ cmpIdx[g.id] = +b.dataset.bi; render(); });
   $('#allog')?.addEventListener('click', () => { allLog = !allLog; render(); });
   $('#rb')?.addEventListener('click', rollback);
   $('#op')?.addEventListener('click', () => call('open_folder',{path:g.path}).catch(e=>setStatus(String(e))));
@@ -1236,7 +1414,7 @@ async function install(g){
 async function act(){
   const g = games[sel], s = state(g);
   if (job?.id === g.id || queue.includes(g.id)) return;
-  if (s==='soon') return setStatus('Переклад ще в роботі. Слідкуйте за новинами');
+  if (s==='soon') return toggleWatch(g);
   if (s==='path') return pickDir(g);
   if (s==='ready') return call('play_game',{appid:g.steam_appid ?? null,gameDir:g.path,exe:(g.exe||[])[0] ?? null}).then(()=>{ setStatus(`Запускаю ${g.name}`); if (prefs.closeOnPlay) setTimeout(()=>win?.close(), 1500); }).catch(e=>setStatus('Не вдалося запустити: '+e));
   install(g);
@@ -1286,22 +1464,27 @@ function mdVisual(){
   const c = g && cover(g);
   if (c) { const im = new Image(); im.alt = ''; im.onload = () => v.classList.add('has'); im.onerror = () => im.remove(); im.src = c; v.prepend(im); }
 }
-function openSupport(){
+const mdFields = () => { const on = mdType === TYPES[0]; $('#md-tx').hidden = !on; $('#dlg').classList.toggle('tall', on); };
+function openSupport(type){
+  if (typeof type === 'string') mdType = type;
   const cur = view === 'game' ? games[sel] : null; mdGid = cur ? cur.id : '';
-  mkDD($('#dd-t'), TYPES.map(t => [t, t]), mdType, v => { mdType = v; });
+  ['#md-w', '#md-was', '#md-ok'].forEach(i => { $(i).value = ''; }); mdFields();
+  mkDD($('#dd-t'), TYPES.map(t => [t, t]), mdType, v => { mdType = v; mdFields(); });
   mkDD($('#dd-g'), [['', 'Не стосується гри'], ...games.filter(x => !x.home).map(x => [x.id, x.name])], mdGid, v => { mdGid = v; mdVisual(); });
   mdMsg(''); mdVisual(); $('#dlg').showModal(); $('#md-d').focus();
 }
 async function mdSend(via){
-  const d = $('#md-d').value.trim(), g = mdGame();
-  if (!d) { mdMsg('Опишіть, що сталося'); $('#md-d').focus(); return; }
+  const g = mdGame(), tx = mdType === TYPES[0], w = $('#md-w').value.trim(), was = $('#md-was').value.trim(), ok = $('#md-ok').value.trim();
+  let d = $('#md-d').value.trim();
+  if (tx && (was || ok || w)) d = [w && 'Де: ' + w, was && 'Зараз: ' + was, ok && 'Має бути: ' + ok, d].filter(Boolean).join('\n');
+  if (!d) { mdMsg(tx ? 'Вкажіть, що саме не так у тексті' : 'Опишіть, що сталося'); (tx ? $('#md-was') : $('#md-d')).focus(); return; }
   const subject = mdType + (g ? ': ' + g.name : ''), body = d + ($('#md-c').checked ? '\n\n---\n' + diagFor(g) : '');
   const url = via === 'mail' ? `mailto:${SUPPORT.email}?subject=${encodeURIComponent('Ліхтар. ' + subject)}&body=${encodeURIComponent(body)}` : `${SUPPORT.issues}/new?title=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   try { await call('open_url', {url}); } catch { window.open(url, '_blank'); }
-  $('#dlg').close(); $('#md-d').value = '';
+  $('#dlg').close(); $('#md-d').value = ''; ['#md-w', '#md-was', '#md-ok'].forEach(i => { $(i).value = ''; });
   notify(via === 'mail' ? 'Лист підготовлено у вашій поштовій програмі' : 'Сторінку звернення відкрито в браузері', 'ok');
 }
-$('#sup').onclick = openSupport;
+$('#sup').onclick = () => openSupport();
 $('#md-mail').onclick = () => mdSend('mail'); $('#md-gh').onclick = () => mdSend('gh');
 $('#dclose').onclick = () => $('#dlg').close();
 $('#dlg').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
@@ -1335,8 +1518,45 @@ async function applySelf(){
   if (!selfUpd) return;
   if (busy) { setStatus('Дочекайтеся завершення встановлення патча'); return; }
   setStatus('Завантажую оновлення Ліхтаря…');
+  lsSet(NOTES_KEY, JSON.stringify({v: selfUpd.version, body: selfUpd.body || ''}));
   try { await selfUpd.downloadAndInstall(); await T.process.relaunch(); }
   catch(e) { log('updater: ' + e); setStatus('Помилка оновлення: ' + e); }
+}
+/* ---- «Що нового»: після оновлення показуємо список змін з опису релізу на GitHub ---- */
+const APP_REPO = 'gustihax/lichtar', VER_KEY = 'lichtar.ver', NOTES_KEY = 'lichtar.notes';
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
+function notesHtml(md){
+  const inl = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>');
+  const SV = d => `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="${d}"/></svg>`;
+  const IC = {new: SV('M6 2v8M2 6h8'), fix: SV('M2.5 6.4l2.3 2.3 4.7-5'), imp: SV('M6 10V2.2M2.6 5.4L6 2l3.4 3.4'), '': SV('M6 4.2v.01M6 6.4V9')};
+  const kind = h => /нов|додан|new/i.test(h) ? ['new', IC.new] : /виправ|fix/i.test(h) ? ['fix', IC.fix] : /покращ|змін|improv/i.test(h) ? ['imp', IC.imp] : ['', SV('M3 6h6')];
+  let out = '', sec = false, ul = false;
+  const closeUl = () => { if (ul) { out += '</ul>'; ul = false; } };
+  const closeSec = () => { closeUl(); if (sec) { out += '</section>'; sec = false; } };
+  for (const raw of String(md || '').replace(/\r/g, '').split('\n')) {
+    const l = raw.trim(); if (!l) { closeUl(); continue; }
+    let m;
+    if ((m = /^#{1,4}\s+(.*)$/.exec(l))) { closeSec(); const [k, ic] = kind(m[1]); out += `<section class="wn-s ${k}"><h3><i>${ic}</i>${inl(m[1])}</h3>`; sec = true; }
+    else if ((m = /^[-*+]\s+(.*)$/.exec(l))) { if (!sec) { out += `<section class="wn-s new"><h3><i>${IC.new}</i>Нове</h3>`; sec = true; } if (!ul) { out += '<ul>'; ul = true; } out += `<li>${inl(m[1])}</li>`; }
+    else { closeUl(); out += `<p>${inl(l)}</p>`; }
+  }
+  closeSec(); return out;
+}
+function showWhatsNew(ver, body){
+  let d = $('#wn'); if (!d) { d = document.createElement('dialog'); d.id = 'wn'; d.className = 'wn'; document.body.append(d); }
+  d.innerHTML = `<div class="wn-h"><div class="wn-lamp"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M24 19c0-10 16-10 16 0"/><path d="M20 26l4-7h16l4 7z"/><path d="M22 26v22M42 26v22"/><path d="M19 48h26l-2 6H21z"/></svg></div><div><div class="wn-k">Ліхтар оновлено</div><h2>Що нового <span class="wn-v">${esc(ver)}</span></h2></div></div><div class="wn-b">${notesHtml(body)}</div><div class="wn-f"><a href="https://github.com/${APP_REPO}/releases/tag/v${esc(ver)}">Усі зміни на GitHub</a><button id="wn-ok">Зрозуміло</button></div>`;
+  $('#wn-ok').onclick = () => d.close(); d.showModal(); $('#wn-ok').focus();
+}
+async function checkWhatsNew(){
+  let ver; try { ver = DEMO ? (lsGet('lichtar.demoVer') || '0.1.1') : await T.app.getVersion(); } catch { return; }
+  const last = lsGet(VER_KEY);
+  if (!last) { lsSet(VER_KEY, ver); return; }
+  if (last === ver) return;
+  let body = ''; try { const n = JSON.parse(lsGet(NOTES_KEY)); if (n && n.v === ver) body = n.body || ''; } catch {}
+  if (!body) { try { body = JSON.parse(await getText(`https://api.github.com/repos/${APP_REPO}/releases/tags/v${ver}`)).body || ''; } catch {} }
+  lsSet(VER_KEY, ver); lsSet(NOTES_KEY, null);
+  if (body.trim()) showWhatsNew(ver, body);
 }
 /* зовнішні посилання відкриваємо в браузері */
 document.addEventListener('click', e => { const a = e.target.closest?.('a[href^="http"]'); if (!a) return; e.preventDefault(); call('open_url',{url:a.href}).catch(() => window.open(a.href, '_blank', 'noopener')); });

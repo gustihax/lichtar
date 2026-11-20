@@ -208,6 +208,31 @@ fn gog_path(_id: &str) -> Option<PathBuf> {
     None
 }
 
+/// Epic Games: кожна встановлена гра має маніфест *.item (JSON) з полем InstallLocation.
+fn epic_dirs_in(manifests: &Path) -> Vec<PathBuf> {
+    let Ok(rd) = fs::read_dir(manifests) else { return Vec::new() };
+    let mut out = Vec::new();
+    for entry in rd.flatten() {
+        let path = entry.path();
+        if !path.extension().map_or(false, |x| x.eq_ignore_ascii_case("item")) {
+            continue;
+        }
+        let Ok(text) = fs::read_to_string(&path) else { continue };
+        let Ok(v) = serde_json::from_str::<serde_json::Value>(text.trim_start_matches('\u{feff}')) else { continue };
+        if let Some(dir) = v.get("InstallLocation").and_then(|x| x.as_str()) {
+            if !dir.is_empty() {
+                out.push(PathBuf::from(dir));
+            }
+        }
+    }
+    out
+}
+
+fn epic_dirs() -> Vec<PathBuf> {
+    let base = std::env::var_os("ProgramData").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("C:\\ProgramData"));
+    epic_dirs_in(&base.join("Epic").join("EpicGamesLauncher").join("Data").join("Manifests"))
+}
+
 fn detect_blocking(appid: Option<u32>, gog_id: Option<String>, exes: Vec<String>, folders: Vec<String>) -> Option<String> {
     if let Some(p) = appid.and_then(find_steam_game_dir) {
         if has_game(Path::new(&p), &exes) {
@@ -221,6 +246,11 @@ fn detect_blocking(appid: Option<u32>, gog_id: Option<String>, exes: Vec<String>
     }
     if exes.is_empty() {
         return None;
+    }
+    for dir in epic_dirs() {
+        if has_game(&dir, &exes) {
+            return Some(pretty_path(&dir));
+        }
     }
     let bases = [
         "",
@@ -643,12 +673,29 @@ fn find_steam_game_cmd(appid: u32) -> Option<String> {
 
 #[cfg(test)]
 mod path_tests {
-    use super::strip_verbatim;
+    use super::{epic_dirs_in, strip_verbatim};
 
     #[test]
     fn verbatim_prefix_is_removed() {
         assert_eq!(strip_verbatim("\\\\?\\C:\\Games\\Blood West"), "C:\\Games\\Blood West");
         assert_eq!(strip_verbatim("\\\\?\\UNC\\srv\\share\\g"), "\\\\srv\\share\\g");
         assert_eq!(strip_verbatim("D:\\Steam"), "D:\\Steam");
+    }
+
+    #[test]
+    fn epic_manifests_are_read() {
+        let dir = std::env::temp_dir().join(format!("lichtar_epic_test_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("A.item"), "\u{feff}{\"InstallLocation\": \"C:/Games/Epic/Hades\", \"DisplayName\": \"Hades\"}").unwrap();
+        std::fs::write(dir.join("B.ITEM"), "{\"InstallLocation\": \"D:/Games/Celeste\"}").unwrap();
+        std::fs::write(dir.join("C.item"), "не json").unwrap();
+        std::fs::write(dir.join("D.item"), "{\"InstallLocation\": \"\"}").unwrap();
+        std::fs::write(dir.join("notes.txt"), "{\"InstallLocation\": \"X:/no\"}").unwrap();
+        let mut got: Vec<String> = epic_dirs_in(&dir).iter().map(|p| p.to_string_lossy().into_owned()).collect();
+        got.sort();
+        assert_eq!(got, vec!["C:/Games/Epic/Hades".to_string(), "D:/Games/Celeste".to_string()]);
+        assert!(epic_dirs_in(&dir.join("немає")).is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }
